@@ -1,0 +1,159 @@
+<%- include("../../views/pratials/user/header") %>
+
+<style>
+
+    .order-details-container {
+        max-width: 1100px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .order-header h2 {
+        font-size: 1.8rem;
+        color: #333;
+        margin: 0;
+    }
+
+    .order-summary {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 8px;
+    }
+
+    .order-summary p {
+        margin: 5px 0;
+        font-size: 1rem;
+    }
+
+    .product-list {
+        margin-top: 20px;
+    }
+
+    .product-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .product-item:last-child {
+        border-bottom: none;
+    }
+
+    .product-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .product-info {
+        flex: 1;
+    }
+
+    .product-info span {
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 5px;
+    }
+
+    .product-info .product-name {
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .order-status {
+        margin-top: 20px;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 10px 15px;
+        border-radius: 8px;
+        color: white;
+        display: inline-block;
+    }
+
+    .order-status.pending {
+        background-color: #ffc107;
+    }
+
+    .order-status.shipped {
+        background-color: #17a2b8;
+    }
+
+    .order-status.delivered {
+        background-color: #28a745;
+    }
+
+    .order-status.cancelled {
+        background-color: #dc3545;
+    }
+
+    .no-order-details {
+        font-size: 1.2rem;
+        color: #777;
+        text-align: center;
+        margin-top: 50px;
+    }
+</style>
+
+<div class="order-details-container">
+    <% if (order) { %>
+        <!-- Order Header -->
+        <div class="order-header">
+            <h2>Order Details</h2>
+            <span class="order-status <%= order.status.toLowerCase() %>">
+                <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+            </span>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <p><strong>Order ID:</strong> <%= order.orderId %></p>
+            <p><strong>Order Date:</strong> <%= new Date(order.createdOn).toLocaleDateString() %></p>
+            <p><strong>Total Price:</strong> $<%= order.totalPrice %></p>
+            <p><strong>Shipping Address:</strong></p>
+             <!-- Assuming we display the first address -->
+                <p><%= address.name %></p>
+                <p><%= address.addressType %> Address</p>
+                <p><%= address.landMark || 'N/A' %></p>
+                <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
+                <p><strong>Phone:</strong> <%= address.phone %></p>
+                <% if (address.altPhone) { %>
+                    <p><strong>Alternate Phone:</strong> <%= address.altPhone %></p>
+                <% } %>
+            
+        </div>
+
+        <!-- Ordered Items -->
+        <div class="product-list">
+            <% order.orderedItems.forEach(function(item) { %>
+                <div class="product-item">
+                    <img src="/uploads/re-image/<%= item.product.productImage[0] || 'default.jpg' %>" alt="<%= item.product.name %>" class="product-image">
+                    <div class="product-info">
+                        <span class="product-name"><%= item.product.prodectName %></span>
+                        <span><strong>Price:</strong> $<%= item.totalprice %></span>
+                        <span><strong>Quantity:</strong> <%= item.quantity %></span>
+                        <span><strong>Weight:</strong> <%= item.weights || 'N/A' %></span>
+                        <span><strong>Flavour:</strong> <%= item.flavours || 'N/A' %></span>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <p class="no-order-details">No details found for this order.</p>
+    <% } %>
+</div>
+
+<%- include("../../views/pratials/user/footer") %>

@@ -1,0 +1,254 @@
+<%- include("../../views/pratials/user/header") %>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    /* Global Styles */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f7f9fc;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        width: 85%;
+        max-width: 900px;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        font-size: 28px;
+        color: #333;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    input[type="text"], input[type="number"], select {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+        border-color: #007bff;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .form-group.wide {
+        width: 100%;
+    }
+
+    button[type="submit"] {
+        background-color: #28a745;
+        color: white;
+        font-size: 16px;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #218838;
+    }
+
+    .back-link {
+        display: block;
+        margin-top: 30px;
+        text-align: center;
+        color: #007bff;
+        font-size: 16px;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .text-danger {
+        color: red;
+        font-size: 14px;
+    }
+
+    /* Media Query for smaller screens */
+    @media (max-width: 768px) {
+        .form-row {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<body>
+    <div class="container">
+        <h2>Create a New Address</h2>
+        <form id="addressForm" method="POST" action="/addAddress">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="addressType">Address Type:</label>
+                    <input type="text" id="addressType" name="addressType" required>
+                    <div id="addressType-error" class="text-danger"></div>
+                </div>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                    <div id="name-error" class="text-danger"></div>
+                </div>
+                <div class="form-group">
+                    <label for="city">City:</label>
+                    <input type="text" id="city" name="city" required>
+                    <div id="city-error" class="text-danger"></div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="landMark">Landmark:</label>
+                    <input type="text" id="landMark" name="landMark" required>
+                    <div id="landMark-error" class="text-danger"></div>
+                </div>
+                <div class="form-group">
+                    <label for="state">State:</label>
+                    <input type="text" id="state" name="state" required>
+                    <div id="state-error" class="text-danger"></div>
+                </div>
+                <div class="form-group">
+                    <label for="pincode">Pincode:</label>
+                    <input type="number" id="pincode" name="pincode" required>
+                    <div id="pincode-error" class="text-danger"></div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="number" id="phone" name="phone" required>
+                    <div id="phone-error" class="text-danger"></div>
+                </div>
+                <div class="form-group">
+                    <label for="altPhone">Alternate Phone:</label>
+                    <input type="number" id="altPhone" name="altPhone" required>
+                    <div id="altPhone-error" class="text-danger"></div>
+                </div>
+            </div>
+
+            <button type="submit">Add Address</button>
+        </form>
+
+        <a href="/address" class="back-link">Back to Address List</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('addressForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission for validation
+
+            let isValid = true;
+
+            // Clear previous errors
+            const errorFields = ["addressType", "name", "city", "landMark", "state", "pincode", "phone", "altPhone"];
+            errorFields.forEach(field => {
+                document.getElementById(field + '-error').textContent = '';
+            });
+
+            // Form field values
+            const addressType = document.getElementById('addressType').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const landMark = document.getElementById('landMark').value.trim();
+            const state = document.getElementById('state').value.trim();
+            const pincode = document.getElementById('pincode').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const altPhone = document.getElementById('altPhone').value.trim();
+
+            const namePattern = /^[A-Za-z\s]+$/;
+            const pincodePattern = /^\d{6}$/;
+            const phonePattern = /^\d{10}$/;
+
+            // Validate fields
+            if (!addressType) {
+                document.getElementById('addressType-error').textContent = "Address Type is required.";
+                isValid = false;
+            }
+
+            if (!name || !namePattern.test(name)) {
+                document.getElementById('name-error').textContent = "Name should contain only letters.";
+                isValid = false;
+            }
+
+            if (!city || !namePattern.test(city)) {
+                document.getElementById('city-error').textContent = "City should contain only letters.";
+                isValid = false;
+            }
+
+            if (!landMark || !namePattern.test(landMark)) {
+                document.getElementById('landMark-error').textContent = "Landmark should contain only letters.";
+                isValid = false;
+            }
+
+            if (!state || !namePattern.test(state)) {
+                document.getElementById('state-error').textContent = "State should contain only letters.";
+                isValid = false;
+            }
+
+            if (!pincode || !pincodePattern.test(pincode)) {
+                document.getElementById('pincode-error').textContent = "Pincode should be a 6-digit number.";
+                isValid = false;
+            }
+
+            if (!phone || !phonePattern.test(phone)) {
+                document.getElementById('phone-error').textContent = "Phone number should be a 10-digit number.";
+                isValid = false;
+            }
+
+            if (!altPhone || !phonePattern.test(altPhone)) {
+                document.getElementById('altPhone-error').textContent = "Alternate phone number should be a 10-digit number.";
+                isValid = false;
+            }
+
+            if (phone === altPhone) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Phone and alternate phone numbers must be different.',
+                    icon: 'error'
+                });
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Submit form if valid
+                this.submit();
+            }
+        });
+    </script>
+</body>
+
+<%- include("../../views/pratials/user/footer") %>

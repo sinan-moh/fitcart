@@ -1,0 +1,99 @@
+<%- include("../../views/pratials/admin/header") %>
+
+<style>
+    .error-message {
+        color: red;
+    }
+
+    .thumbnails-container {
+        display: flex;
+        overflow-x: auto;
+    }
+
+    .thumbnail {
+        margin-right: 10px;
+    }
+</style>
+
+<section class="content-main">
+    <div class="row">
+        <div class="col-9">
+            <div class="content-header">
+                <h2 class="content-title">Order Management</h2>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Product Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td><%= order.id %></td>
+                                    <td><%= order.customerName %></td>
+                                    <td><%= order.productNames %></td>
+                                    <td id="status-<%= order.id %>"><%= order.status %></td>
+                                    <td id="actions-<%= order.id %>">
+                                        <% if (order.status === 'Placed') { %>
+                                            <button class="btn btn-success" onclick="updateOrderStatus('<%= order.id %>', 'Processing')">Accept</button>
+                                            <button class="btn btn-danger" onclick="updateOrderStatus('<%= order.id %>', 'Rejected')">Reject</button>
+                                        <% } else if (order.status === 'Processing') { %>
+                                            <button class="btn btn-primary" onclick="updateOrderStatus('<%= order.id %>', 'Shipped')">Mark as Shipped</button>
+                                        <% } else if (order.status === 'Shipped') { %>
+                                            <button class="btn btn-info" onclick="updateOrderStatus('<%= order.id %>', 'Delivered')">Mark as Delivered</button>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function updateOrderStatus(orderId, newStatus) {
+        fetch('/admin/updateOrderStatus', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId, status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the order status in the table
+                document.getElementById(`status-${orderId}`).innerText = newStatus;
+
+                const actionsCell = document.getElementById(`actions-${orderId}`);
+                if (newStatus === '') {
+                    actionsCell.innerHTML = '<button class="btn btn-primary" onclick="updateOrderStatus(\'' + orderId + '\', \'Shipped\')">Shipped</button>';
+                } else if (newStatus === 'Shipped') {
+                    actionsCell.innerHTML = '<button class="btn btn-info" onclick="updateOrderStatus(\'' + orderId + '\', \'Delivered\')">Delivered</button>';
+                } else {
+                    actionsCell.innerHTML = ''; // Clear actions for Rejected or Delivered
+                }
+            } else {
+                alert('Failed to update order status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error updating order status:', error);
+            alert('An error occurred while updating the order status.');
+        });
+    }
+</script>
+
+<%- include("../../views/pratials/admin/footer") %>

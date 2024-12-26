@@ -1,0 +1,729 @@
+<%- include("../../views/pratials/user/header") %>
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            width: 80%;
+            margin: 40px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .left-section {
+            width: 60%;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        .right-section {
+            width: 35%;
+            padding: 20px;
+            background-color: #f1f3f5;
+        }
+
+        h2 {
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        /* Product Details */
+        .product-details {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .product {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .product img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .product-info {
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+
+        .product-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .product-price {
+            color: #6c757d;
+            font-size: 0.95em;
+        }
+
+        /* Address Section */
+        .address-group {
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .address-group input[type="radio"] {
+            margin-right: 15px;
+        }
+
+        .address-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #495057;
+        }
+
+        .address-info {
+            font-size: 0.95em;
+            color: #6c757d;
+        }
+
+        .address-info strong {
+            font-weight: 600;
+            color: #007bff;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #495057;
+        }
+
+        /* Price Section with Border */
+        .price-details {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #495057;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .total-payable {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #28a745;
+            margin-top: 15px;
+        }
+
+        .total-savings {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .price-summary {
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        .safe-payments {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .safe-payments img {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #888;
+            /* Gray color for the strikethrough */
+            margin-right: 10px;
+            /* Space between the original price and the discounted price */
+        }
+
+        .discounted-price {
+            color: #e74c3c;
+            /* Red color for the discount price */
+            font-weight: bold;
+            /* Bold text to highlight the discount */
+        }
+
+
+        /* Payment Section */
+        .payment-section {
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+
+        .payment-method label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .payment-method select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: #495057;
+            margin-bottom: 20px;
+            transition: border 0.3s ease;
+        }
+
+        .payment-method select:hover {
+            border-color: #007bff;
+        }
+
+        .btn-place-order {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2em;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-place-order:hover {
+            background-color: #218838;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            width: 350px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            color: #6c757d;
+            cursor: pointer;
+        }
+
+        .btn-close:hover {
+            color: #343a40;
+        }
+
+        .modal-body label {
+            display: block;
+            margin: 8px 0 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .modal-body input[type="text"],
+        .modal-body textarea,
+        .modal-body select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .btn-save {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-save:hover {
+            background-color: #0056b3;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <body>
+        <div class="container">
+            <!-- Left Section -->
+            <div class="left-section">
+                <!-- Product Details Section -->
+                <div class="product-details">
+                    <h2>1. Product Details</h2>
+                    <% if (cartItems && cartItems.length> 0) { %>
+                        <% cartItems.forEach(function (item) { %>
+                            <div class="product">
+                                <img src="/uploads/re-image/<%= item.image ? item.image : 'default-image.jpg' %>"
+                                    alt="<%= item.productName %>" class="product-image">
+                                <div class="product-info">
+                                    <p class="product-name">
+                                        <%= item.productName %>
+                                    </p>
+                                    <p class="product-price">₹<%= item.price %> x <%= item.quantity %> = ₹<%=
+                                                    item.totalPrice %>
+                                    </p>
+                                </div>
+                            </div>
+                            <% }); %>
+                                <% } else { %>
+                                    <p>No products in your cart. Please add some products to proceed.</p>
+                                    <% } %>
+                </div>
+
+                <!-- Delivery Address Section -->
+                <h2>2. Delivery Address</h2>
+                <div class="section">
+                    <% addresses.forEach(function (address) { %>
+                        <div class="address-group">
+                            <input type="radio" id="address<%= address._id %>" name="address" <%=address.isSelected
+                                ? 'checked' : '' %> onclick="selectAddress('<%= address._id %>')">
+                                <label for="address<%= address._id %>">
+                                    <div>
+                                        <strong>
+                                            <%= address.name %> (<%= address.addressType %>)
+                                        </strong><br>
+                                        <span class="address-info">
+                                            <%= address.city %>, <%= address.state %> - <%= address.pincode %>
+                                        </span><br>
+                                        <span class="phone">Phone: <%= address.phone %></span>
+                                    </div>
+                                    <button class="btn-secondary"
+                                        onclick="openModal('<%= address._id %>', '<%= address.name %>', '<%= address.city %>', '<%= address.landmark %>', '<%= address.state %>', '<%= address.pincode %>', '<%= address.phone %>', '<%= address.altPhone %>', '<%= address.addressType %>')">Edit
+                                        Address</button>
+                                </label>
+                        </div>
+                        <% }); %>
+                            <button class="btn-primary" onclick="openAddNewAddressModal()">+ Add a New Address</button>
+                </div>
+
+
+                <div class="payment-section">
+                    <h2>Payment Method</h2>
+                    <div class="payment-method">
+                        <label for="payment-method">Choose a Payment Method:</label>
+                        <select id="payment-method">
+                            <% paymentMethods.forEach(function (method) { %>
+                                <option value="<%= method.toLowerCase().replace(/ /g, '-') %>">
+                                    <%= method %>
+                                </option>
+                                <% }); %>
+                        </select>
+                    </div>
+
+                    <!-- Place Order Button -->
+                    <button class="btn-place-order" onclick="placeOrder()">Place Order</button>
+                </div>
+
+
+            </div>
+
+            <!-- Right Section -->
+            <div class="right-section">
+                <!-- Price Details Section -->
+                <div class="price-details">
+                    <h2>Price Details</h2>
+                    <p>Price (<%= cartItems.length %> items): ₹<%= totals.subtotal %>
+                    </p>
+
+                    <!-- Display Delivery Charge with strikethrough if discount applies -->
+
+                    <% if (totals.deliveryChargeDiscount> 0) { %>
+                        <p>Delivery Charge:
+                            <span class="original-price">₹65</span>
+                            <span class="discounted-price">₹0</span> <!-- Display reduced delivery charge -->
+                        </p>
+                        <% } else { %>
+                            <p>Delivery Charge: ₹65</p> <!-- Regular delivery charge if no discount -->
+                            <% } %>
+
+
+                                <!-- Discount Section -->
+                                <% if (totals.discount> 0) { %>
+                                    <p>Discount:
+                                        <span class="original-price">₹<%= totals.subtotal %></span>
+                                        <span class="discounted-price">-₹<%= totals.discount %></span>
+                                    </p>
+                                    <% } else { %>
+                                        <p>Discount: 0%</p> <!-- Display 0% if no discount -->
+                                        <% } %>
+
+                                            <!-- Total Payable Section -->
+                                            <p class="total-payable">Total Payable: ₹<%= totals.total %>
+                                            </p>
+                </div>
+                <!-- Safe Payments Section -->
+                <div class="safe-payments">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Checkmark_green.svg/1200px-Checkmark_green.svg.png"
+                        alt="Check">
+                    Safe and Secure Payments. Easy returns. 100% Authentic products.
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Address Editing / Adding -->
+        <!-- Modal for Address Editing / Adding -->
+        <div class="modal" id="address-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span id="modal-title">Add Address</span>
+                    <button class="btn-close" onclick="closeModal()">X</button>
+                </div>
+                <div class="modal-body">
+                    <form id="address-form">
+                        <input type="hidden" id="address-id">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required>
+
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" required>
+
+                        <label for="landMark">Landmark:</label>
+                        <input type="text" id="landMark" name="landMark" required>
+
+                        <label for="state">State:</label>
+                        <input type="text" id="state" name="state" required>
+
+                        <label for="pincode">Pincode:</label>
+                        <input type="text" id="pincode" name="pincode" required>
+
+                        <label for="phone">Phone:</label>
+                        <input type="text" id="phone" name="phone" required>
+
+                        <label for="alt-phone">Alternate Phone:</label>
+                        <input type="text" name="altPhone" id="alt-phone">
+
+                        <label for="addressType">Address Type:</label>
+                        <input type="text" id="addresstype" name="addressType" required>
+
+                        <button class="btn-save" type="submit">Save Address</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let selectedAddressId = null;
+
+            // Open Modal for Adding New Address
+            function openAddNewAddressModal() {
+                document.getElementById('modal-title').textContent = 'Add Address';
+                document.getElementById('address-form').reset(); // Reset all fields
+                selectedAddressId = null; // Clear the selected address ID
+                document.getElementById('address-modal').style.display = 'block';
+            }
+
+            // Open Modal for Editing Address
+            function openModal(addressId, name, city, landMark, state, pincode, phone, altPhone, addressType) {
+                document.getElementById('modal-title').textContent = 'Edit Address';
+                document.getElementById('name').value = name;
+                document.getElementById('city').value = city;
+                document.getElementById('landMark').value = landMark;
+                document.getElementById('state').value = state;
+                document.getElementById('pincode').value = pincode;
+                document.getElementById('phone').value = phone;
+                document.getElementById('alt-phone').value = altPhone;
+                document.getElementById('addresstype').value = addressType; // Corrected the id
+                selectedAddressId = addressId; // Store addressId for later use in saveAddress function
+                document.getElementById('address-modal').style.display = 'block';
+            }
+
+            // Close Modal
+            function closeModal() {
+                document.getElementById('address-modal').style.display = 'none';
+            }
+
+            function validateForm(name, city, state, pincode, phone, addressType, landMark) {
+                if (!name || !city || !state || !pincode || !phone || !addressType || !landMark) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'All fields are required!',
+                        icon: 'error',
+                        timer: 3000,  // SweetAlert will stay for 3 seconds
+                        showConfirmButton: false
+                    });
+                    return false;
+                }
+
+                const pincodeRegex = /^[0-9]{6}$/;
+                if (!pincode.match(pincodeRegex)) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Pincode must be 6 digits!',
+                        icon: 'error',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    return false;
+                }
+
+                const phoneRegex = /^[0-9]{10}$/;
+                if (!phone.match(phoneRegex)) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Phone number must be 10 digits!',
+                        icon: 'error',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    return false;
+                }
+
+                return true;
+            }
+
+
+            document.getElementById('address-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const name = document.getElementById('name').value;
+                const city = document.getElementById('city').value;
+                const landMark = document.getElementById('landMark').value;
+                const state = document.getElementById('state').value;
+                const pincode = document.getElementById('pincode').value;
+                const phone = document.getElementById('phone').value;
+                const altPhone = document.getElementById('alt-phone').value;
+                const addressType = document.getElementById('addresstype').value;
+
+                if (!validateForm(name, city, state, pincode, phone, addressType, landMark)) {
+                    return;
+                }
+
+                const endpoint = selectedAddressId ? `/edit-address/${selectedAddressId}` : '/add-address';
+                const method = selectedAddressId ? 'PUT' : 'POST';
+
+                fetch(endpoint, {
+                    method: method,
+                    body: JSON.stringify({
+                        name, city, landMark, state, pincode, phone, altPhone, addressType
+                    }),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message.includes('Address')) {
+                            Swal.fire({
+                                title: data.message,
+                                icon: 'success',
+                                timer: 2000, // Stay for 3 seconds
+                                showConfirmButton: false
+                            }).then(() => {
+
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 3000); // Delay of 3 seconds
+                            });
+                        }
+                        closeModal();
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to update address',
+                            icon: 'error',
+                            timer: 3000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // Delay the reload by 3 seconds in case of an error
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 3000); // Delay of 3 seconds
+                        });
+                        console.error(error);
+                    });
+            });
+            function placeOrder() {
+                const paymentMethod = document.getElementById('payment-method').value; // Get the selected payment method
+                const selectedAddress = getSelectedAddress(); // Get the selected address
+
+                if (!selectedAddress) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Please select a valid address!',
+                        icon: 'error',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+
+                if (!paymentMethod || paymentMethod === "") {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Please select a payment method!',
+                        icon: 'error',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+
+                // Prepare order data
+                const orderData = {
+                    paymentMethod: paymentMethod,
+                    addressId: selectedAddress.id  // Address ID
+                };
+
+                // Send order data to the backend
+                fetch('/place-order', {
+                    method: 'POST',
+                    body: JSON.stringify(orderData),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json()) // Convert response to JSON
+                    .then(data => {
+                        console.log('Response from server:', data);  // Debugging log
+                        if (data.message) {
+                            Swal.fire({
+                                title: data.message, // Show success message
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                // Redirect to the order confirmation page using the orderId
+                                window.location.href = `/order-confirmation/`; // Adjust the URL path as needed
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'There was an error placing your order. Please try again.',
+                                icon: 'error',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'There was an error placing your order. Please try again.',
+                            icon: 'error',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        console.error(error);
+                    });
+            }
+
+            // Function to get the selected address
+            function getSelectedAddress() {
+                const selectedAddress = document.querySelector('input[name="address"]:checked');
+
+                if (selectedAddress) {
+                    const label = selectedAddress.closest('.address-group').querySelector('label');
+                    const addressName = label.querySelector('strong') ? label.querySelector('strong').textContent.trim() : 'No Name Found';
+
+                    console.log('Selected Address:', {
+                        id: selectedAddress.id,
+                        name: addressName
+                    });
+
+                    return {
+                        id: selectedAddress.id,
+                        name: addressName
+                    };
+                }
+
+                console.log('No address selected');
+                return null;
+            }
+
+        </script>
+        <%- include("../../views/pratials/user/footer") %>

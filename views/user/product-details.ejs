@@ -1,0 +1,490 @@
+<%- include("../../views/pratials/user/header") %>
+    <style>
+        .review-section h3 {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .review-section form .form-control {
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .related-products h3 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .related-product {
+            transition: transform 0.2s;
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .related-product:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .related-product img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .related-product .price {
+            color: #ff5c8d;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .product-rating {
+            font-family: Arial, sans-serif;
+            margin: 10px 0;
+        }
+
+        .rating-stars i {
+            color: #f90;
+            /* Orange star color */
+            margin-right: 2px;
+        }
+
+        .rating-count {
+            font-size: 14px;
+        }
+
+        .text-primary {
+            color: #007bff;
+            /* Blue for clickable links */
+        }
+
+        .text-primary:hover {
+            text-decoration: underline;
+        }
+
+        /* Progress Bar */
+        .progress-bar.bg-warning {
+            background-color: #ffc107 !important;
+        }
+
+        /* Stock Badge */
+        .badge.bg-success {
+            background-color: #28a745 !important;
+            color: #fff;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-control .btn {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .quantity-control input {
+            text-align: center;
+            width: 60px;
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        /* Offer Badge */
+        .badge.bg-success.px-4 {
+            background-color: #ff5722 !important;
+            font-weight: 600;
+        }
+
+        /* Tags Badge */
+        .badge.bg-primary {
+            background-color: #007bff !important;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Availability Badge */
+        .badge.bg-info {
+            background-color: #17a2b8 !important;
+            color: #fff;
+        }
+
+        /* Thumbnail Section */
+        .thumbnail {
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.1);
+        }
+
+        .thumbnail-item {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            overflow: hidden;
+        }
+
+        .thumbnail-slider {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+    </style>
+    <main class="main">
+        <section class="mt-50 mb-50">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <div class="product-detail accordion-detail">
+                            <div class="row mb-50">
+                                <!-- Product Images Section -->
+                                <div class="col-md-6 col-sm-12 col-xs-12">
+                                    <div class="detail-gallery">
+                                        <!-- Main Image Display with Zoom -->
+                                        <div class="zoom-container">
+                                            <img id="main-product-image" class="border-radius-10 w-100"
+                                                src="/uploads/re-image/<%= product.productImage[0] %>"
+                                                alt="Main Product Image">
+                                        </div>
+
+                                        <!-- Thumbnail Slider -->
+                                        <div class="thumbnail-slider mt-3">
+                                            <% for (let i=0; i < product.productImage.length; i++) { %>
+                                                <div class="thumbnail-item">
+                                                    <img class="thumbnail border-radius-10"
+                                                        src="/uploads/re-image/<%= product.productImage[i] %>"
+                                                        alt="Thumbnail <%= i + 1 %>"
+                                                        onclick="changeMainImage('/uploads/re-image/<%= product.productImage[i] %>')">
+                                                </div>
+                                                <% } %>
+                                        </div>
+                                    </div>
+                                    <ul class="product-meta list-unstyled font-sm text-muted mt-4">
+                                        <li class="d-flex align-items-center mb-3">
+                                            <strong class="me-2">Stock Status:</strong>
+                                            <span class="badge bg-success text-white">
+                                                <% if (quantity> 0) { %> In Stock <% } else { %> Out of Stock <% } %>
+                                            </span>
+                                        </li>
+
+                                        <li class="d-flex align-items-center mb-3">
+                                            <strong class="me-2">Tags:</strong>
+                                            <a href="#" class="badge bg-primary text-white" rel="tag">
+                                                <%= category.name %>
+                                            </a>
+                                        </li>
+
+                                        <li class="d-flex align-items-center">
+                                            <strong class="me-2">Availability:</strong>
+                                            <span class="badge bg-info text-white">
+                                                <%= quantity %> items
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <!-- Product Details Section -->
+                                <div class="col-md-6 col-sm-12 col-xs-12">
+                                    <div class="detail-info">
+                                        <h2 class="title-detail">
+                                            <%= product.productName %>
+                                        </h2>
+
+                                        <div class="product-rating d-flex align-items-center gap-2">
+                                            <!-- Star Ratings -->
+                                            <div class="rating-stars d-flex align-items-center">
+                                                <i class="fas fa-star  fs-5"></i>
+                                                <i class="fas fa-star  fs-5"></i>
+                                                <i class="fas fa-star  fs-5"></i>
+                                                <i class="fas fa-star  fs-5"></i>
+                                                <i class="fas fa-star-half-alt  fs-5"></i>
+                                            </div>
+
+                                            <!-- Ratings and Reviews -->
+                                            <div class="rating-count ms-2">
+                                                <span class="text-dark fw-bold">34 Ratings</span> &
+                                                <a href="#" class="text-primary text-decoration-none">25 Reviews</a>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- Product Price -->
+                                        <div class="product-price-cover mt-3">
+                                            <div
+                                                class="product-price d-flex justify-content-between align-items-center p-4 bg-light rounded shadow-sm">
+                                                <div class="d-flex align-items-center">
+                                                    <h4 class="text-brand fw-bold me-4 mb-0">₹<%= product.salePrice %>
+                                                    </h4>
+                                                    <h5 class="text-muted text-decoration-line-through me-4 mb-0">₹<%=
+                                                            product.regularPrice %>
+                                                    </h5>
+                                                </div>
+                                                <span class="badge bg-success px-4 py-2 text-white fs-6">
+                                                    <% if (!totalOffer) { %>
+                                                        No Offers
+                                                        <% } else { %>
+                                                            <%= totalOffer %>% OFF
+                                                                <% } %>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Short Description -->
+                                        <div class="short-desc mb-3">
+                                            <p class=" mb-0">
+                                                <%= product.description %>
+                                            </p>
+                                        </div>
+                                        <hr class="border-color-1">
+
+                                        <div class="product-actions mt-4">
+                                            <form action="/addCart" method="POST">
+                                                <!-- Pass Product Details -->
+                                                <input type="hidden" name="productId" value="<%= product._id %>">
+                                                <input type="hidden" name="productName"
+                                                    value="<%= product.productName %>">
+                                                <input type="hidden" name="productImage"
+                                                    value="<%= product.productImage[0] %>">
+                                                <input type="hidden" name="regularPrice"
+                                                    value="<%= product.regularPrice %>">
+                                                <input type="hidden" name="salePrice" value="<%= product.salePrice %>">
+                                                <input type="hidden" name="discount" value="<%= totalOffer || 0 %>">
+
+                                                <!-- Quantity Selector -->
+                                                <label for="quantity" class="form-label">Quantity:</label>
+                                                <div class="quantity-control d-flex align-items-center">
+                                                    <!-- Decrease Button -->
+                                                    <button type="button" class="btn btn-outline-secondary px-3"
+                                                        id="decrease-btn">-</button>
+
+                                                    <!-- Quantity Input -->
+                                                    <input type="number" id="quantity" name="quantity" value="1" min="1"
+                                                        max="5" class="form-control text-center mx-2 w-25" readonly />
+
+                                                    <!-- Increase Button -->
+                                                    <button type="button" class="btn btn-outline-secondary px-3"
+                                                        id="increase-btn">+</button>
+                                                </div>
+
+                                                <!-- Flavour Selection -->
+                                                <label for="flavourSelect" class="form-label">Flavour:</label>
+                                                <select class="form-select mb-3" id="flavourSelect" name="flavours"
+                                                    required>
+                                                    <% product.flavours.forEach((item)=> { %>
+                                                        <option value="<%= item %>">
+                                                            <%= item %>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+
+                                                <!-- Weight Selection -->
+                                                <label for="weightSelect" class="form-label">Weight:</label>
+                                                <select class="form-select mb-3" id="weightSelect" name="weights"
+                                                    required>
+                                                    <% product.weights.forEach((item)=> { %>
+                                                        <option value="<%= item %>">
+                                                            <%= item %> Kg
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+
+                                                <!-- Add to Cart Button -->
+                                                <button type="button" class="btn btn-primary" id="addToCartBtn">
+                                                    <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+                                                </button>
+                                            </form>
+                                        </div>
+
+
+                                        <hr class="border-color-1">
+                                        <div class="review-section mt-5">
+                                            <h3 class="mb-3">Leave a Review</h3>
+                                            <form action="/product/<%= product._id %>/review" method="POST">
+                                                <div class="mb-3">
+                                                    <label for="reviewText" class="form-label">Your Review</label>
+                                                    <textarea class="form-control" id="reviewText" name="review"
+                                                        rows="4" placeholder="Write your review here..."
+                                                        required></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="reviewRating" class="form-label">Rating</label>
+                                                    <select class="form-select" id="reviewRating" name="rating"
+                                                        required>
+                                                        <option value="">Select Rating</option>
+                                                        <option value="5">5 - Excellent</option>
+                                                        <option value="4">4 - Very Good</option>
+                                                        <option value="3">3 - Good</option>
+                                                        <option value="2">2 - Fair</option>
+                                                        <option value="1">1 - Poor</option>
+                                                    </select>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            <div class="related-products mt-5">
+                <h3>You may also like</h3>
+                <div class="row">
+                    <% relatedProducts.forEach(function(relatedProduct) { %>
+                        <div class="col-md-2">
+                            <div class="related-product border p-3 text-center rounded shadow-sm">
+                                <img src="/uploads/re-image/<%= relatedProduct.productImage[0] %>"
+                                    alt="<%= relatedProduct.name %>" class="img-fluid mb-2">
+                                <h4 class="fs-6">
+                                    <%= relatedProduct.productName %>
+                                </h4>
+                                <p class="price text-brand fw-bold">₹<%= relatedProduct.salePrice %>
+                                </p>
+                                <a href="/productDetails?id=<%= relatedProduct._id %>"
+                                    class="btn btn-outline-primary btn-sm mt-2">View Product</a>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+
+        const quantityInput = document.getElementById('quantity');
+        const increaseBtn = document.getElementById('increase-btn');
+        const decreaseBtn = document.getElementById('decrease-btn');
+
+        // Increase Quantity
+        increaseBtn.addEventListener('click', () => {
+            let currentValue = parseInt(quantityInput.value);
+            const maxValue = parseInt(quantityInput.max);
+
+            if (currentValue < maxValue) {
+                quantityInput.value = currentValue + 1;
+            }
+        });
+
+        decreaseBtn.addEventListener('click', () => {
+            let currentValue = parseInt(quantityInput.value);
+            const minValue = parseInt(quantityInput.min);
+
+            if (currentValue > minValue) {
+                quantityInput.value = currentValue - 1;
+            }
+        });
+        document.getElementById('addToCartBtn').addEventListener('click', async () => {
+    // Retrieve product details dynamically
+    const productId = document.querySelector('input[name="productId"]').value;
+    const quantity = document.getElementById('quantity').value;
+    const flavours = document.getElementById('flavourSelect').value;
+    const weights = document.getElementById('weightSelect').value;
+    const productName = document.querySelector('input[name="productName"]').value;
+    const productImage = document.querySelector('input[name="productImage"]').value;
+    const regularPrice = document.querySelector('input[name="regularPrice"]').value;
+    const salePrice = document.querySelector('input[name="salePrice"]').value;
+
+    try {
+        // Perform the AJAX request
+        const response = await fetch('/addCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                productId,
+                quantity,
+                flavours,
+                weights,
+                productName,
+                productImage,
+                regularPrice,
+                salePrice,
+            }),
+        });
+
+        const result = await response.json();
+
+        // Handle success and error with SweetAlert
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Added to Cart!',
+                text: result.message,
+                showConfirmButton: false,
+                timer: 1500,
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: result.message,
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+
+        // Handle network or unexpected errors
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to add to cart. Please try again later.',
+        });
+    }
+});
+
+
+
+
+        // Change Main Image on Thumbnail Click
+        function changeMainImage(imagePath) {
+            const zoomContainer = document.querySelector('.zoom-container');
+            zoomContainer.style.backgroundImage = `url(${imagePath})`;
+        }
+
+        // Setup Initial Zoom
+        const zoomContainer = document.querySelector('.zoom-container');
+        const mainImage = document.querySelector('#main-product-image');
+        zoomContainer.style.backgroundImage = `url(${mainImage.src})`;
+        mainImage.style.visibility = "hidden";
+
+        zoomContainer.addEventListener('mousemove', (e) => {
+            const rect = zoomContainer.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            zoomContainer.style.backgroundPosition = `${x}% ${y}%`;
+        });
+
+        let scale = 1;
+        zoomContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomStep = 0.1;
+            scale = e.deltaY < 0 ? Math.min(scale + zoomStep, 3) : Math.max(scale - zoomStep, 1);
+            zoomContainer.style.backgroundSize = `${scale * 100}%`;
+        });
+    </script>
+
+    <%- include("../../views/pratials/user/footer") %>

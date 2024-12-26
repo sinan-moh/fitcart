@@ -1,0 +1,216 @@
+<%- include("../../views/pratials/user/header") %>
+
+
+    <!-- Profile Page CSS -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .profile-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* Sidebar Navigation */
+        .profile-sidebar {
+            width: 280px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .profile-sidebar h3 {
+            font-size: 1.4rem;
+            color: #007bff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .profile-sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .profile-sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .profile-sidebar a {
+            color: #555;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .profile-sidebar a:hover,
+        .profile-sidebar a.active {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* Profile Content */
+        .profile-content {
+            flex: 1;
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007bff;
+        }
+
+        .profile-avatar-initial {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #007bff;
+            /* Background color for the circle */
+            color: white;
+            /* Text color */
+            font-size: 36px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            /* Optional shadow for a clean look */
+        }
+
+
+        .profile-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        .profile-header p {
+            margin: 5px 0 0;
+            color: #555;
+        }
+
+        /* Profile Details */
+        .profile-details {
+            margin-top: 20px;
+        }
+
+        .profile-details h4 {
+            margin-bottom: 10px;
+            color: #007bff;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .profile-details p {
+            margin: 5px 0;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .profile-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .profile-actions a {
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .profile-actions a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+
+    <!-- Profile Page -->
+    <div class="profile-container">
+        <!-- Sidebar -->
+        <div class="profile-sidebar">
+            <h3>Dashboard</h3>
+            <ul>
+                <li><a href="#" class="active"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="/userAdderss"><i class="fas fa-map-marker-alt"></i> My Address</a></li>
+                <li><a href="/myOrder"><i class="fas fa-shopping-cart"></i> My Orders</a></li>
+                <li><a href="#"><i class="fas fa-wallet"></i> Wallet</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Profile Content -->
+        <div class="profile-content">
+            <!-- Header -->
+            <div class="profile-header">
+
+                <!-- Show the first letter of the user's name -->
+                <div class="profile-avatar-initial">
+                    <%= user.name ? user.name.charAt(0).toUpperCase() : '?' %>
+                </div>
+
+
+                <div>
+                    <h2>Welcome, <%= user.name %>!</h2>
+                    <p>Email: <%= user.email %>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="profile-details">
+                <h4>Personal Information</h4>
+                <p><strong>Phone:</strong>
+                    <%= user.phone || 'N/A' %>
+                </p>
+                <p><strong>Email:</strong>
+                    <%= user.email %>
+                </p>
+                <p><strong>Member Since:</strong>
+                    <%= user.createdOn ? user.createdOn.toISOString().split('T')[0] : 'N/A' %>
+                </p>
+
+            </div>
+
+            <!-- Actions -->
+            <div class="profile-actions">
+                <a href="/change-email">Edit Profile</a>
+                <a href="/change-password">Change Password</a>
+            </div>
+        </div>
+    </div>
+
+
+    <%- include("../../views/pratials/user/footer") %>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitcart Sign Up</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #dce2ea;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .logo img {
+            width: 130px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        input,
+        select,
+        button {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+
+
+
+
+        a .social-logo {
+            width: 30px;
+            /* Adjust logo size */
+            height: 30px;
+            /* Adjust logo size */
+        }
+
+        .google {
+
+            transition: background-color 0.3s ease;
+            background-color: #fff;
+            /* Google red */
+        }
+
+        .google:hover {
+            background-color: #fff;
+            /* Darker Google red */
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 10px 0;
+            /* Adds spacing around the separator */
+            font-size: 16px;
+            /* Size of the "OR" text */
+            color: #666;
+            /* Text color */
+        }
+
+        .separator::before,
+        .separator::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-color: #ccc;
+            /* Line color */
+            margin: 0 10px;
+            /* Space between the line and the "OR" text */
+        }
+
+        .separator span {
+            padding: 0 10px;
+            /* Adds padding around the "OR" text */
+            background-color: #fff;
+            /* Background color to match the form (to overlap line) */
+        }
+
+
+
+        .footer {
+            padding-top: 27px;
+            display: grid;
+            justify-content: center;
+        }
+
+        .footer p {
+            justify-content: center;
+            display: flex;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.75rem;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="container">
+            <div class="logo">
+                <img src="images/logo.png" alt="Fitcart Logo"> <!-- Replace with your actual logo -->
+            </div>
+            <h3>Sign Up</h3>
+            <form action="/signup" method="POST" id="signform">
+                <div>
+
+                    <input id="name" type="text" name="name" placeholder="Full Name" required>
+                    <div id="error1" class="error-message"></div>
+                </div>
+
+                <div>
+                    <input id="email" type="email" name="email" placeholder="Email" required>
+                    <div id="error2" class="error-message"></div>
+                    <% if (typeof message !== 'undefined' && message) { %>
+                        <div class="" style="color: red;"> <%= message %></div>
+                    <% } %>
+                    
+                </div>
+                <div>
+                    <input id="phone" type="text" name="phone" placeholder="Mobile Number" required>
+                    <div id="error3" class="error-message"></div>
+                </div>
+                <div>
+                    <input id="password" type="password" name="password" placeholder="Password" required>
+                    <div id="error4" class="error-message"></div>
+                </div>
+                <div>
+                    <input id="cpassword" type="password" name="c password" placeholder="confirm Password" required>
+                    <div id="error5" class="error-message"></div>
+                </div>
+                <button type="submit">Request OTP</button>
+            </form>
+
+            <!-- OR separator and Google login -->
+            <div class="separator">
+                <span>OR</span>
+            </div>
+
+
+            <div class="social-login">
+                <a class="google" href="/auth/google">
+                    <img src="images/google.logo.jpeg" alt="Google Logo" class="social-logo">
+                </a>
+            </div>
+
+            <!-- Link for returning users -->
+            <p class="returning-user" style="padding-top: 10px;">Returning user? <a href="login.html">Log in here</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>By continuing, you agree to Fitcart's Terms of Use and Privacy Policy.</p>
+            <p>Facing issues with login? <a href="mailto:friends@fitcart.com">Email us</a></p>
+        </div>
+    </div>
+    <script>
+        const nameid = document.getElementById("name")
+        const emailid = document.getElementById("email")
+        const phoneid = document.getElementById("phone")
+        const passid = document.getElementById("password")
+        const cpassid = document.getElementById("cpassword")
+        const error1 = document.getElementById("error1")
+        const error2 = document.getElementById("error2")
+        const error3 = document.getElementById("error3")
+        const error4 = document.getElementById("error4")
+        const error5 = document.getElementById("error5")
+        const signform = document.getElementById("signform")
+
+
+        function nameValidateChecking(e) {
+            const nameval = nameid.value;
+            const namepattern = /^[A-Za-z\s]+$/;
+
+            if (nameval.trim() === "") {
+                error1.style.display = "block";
+                error1.innerHTML = "pleas enter a valid name"
+            } else if (!namepattern.test(nameval)) {
+                error1.style.display = "block";
+                error1.innerHTML = "name acn only contains alphebets and space"
+            } else {
+                error1.style.display = "none";
+                error1.innerHTML = "";
+            }
+        }
+        function emailValidateChecking(e) {
+            const emailval = emailid.value
+            const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+
+
+
+            if (!emailpattern.test(emailval)) {
+                error2.style.display = "block";
+                error2.innerHTML = "invaled format"
+            } else {
+                error2.style.display = "none";
+                error2.innerHTML = "";
+
+            }
+        }
+
+        function phoneValidateChecking(e) {
+            const phoneval = phoneid.value;
+
+            if (phoneval.trim() === "") {
+                error3.style.display = "block";
+                error3.innerHTML = "pleas enter a valid phone-number"
+            } else if (phoneval.length < 10 || phoneval.length > 10) {
+                error3.style.display = "block"
+                error3.innerHTML = "Enter 10 digit"
+            } else {
+                error3.style.display = "none";
+                error3.innerHTML = "";
+            }
+
+        }
+        function passValidateChecking(e) {
+            const passval = passid.value
+            const cpassval = cpassid.value
+            const alpha = /[a-zA-Z]/;
+            const digit = /\d/;
+
+            if (passval.length < 8) {
+                error4.style.display = "block"
+                error4.innerHTML = "should contain atleast 8 charactes"
+            } else if (!alpha.test(passval) || !digit.test(passval)) {
+                error4.style.display = "block";
+                error4.innerHTML = "should contains alphabets and numbers";
+            } else {
+                error4.style.display = "none";
+                error4.innerHTML = "";
+            }
+
+            if (passval !== cpassval) {
+                error5.style.display = "block";
+                error5.innerHTML = "password d'not match"
+            } else {
+                error5.style.display = "none";
+                error5.innerHTML = "";
+
+            }
+
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            signform.addEventListener("submit", function (e) {
+
+                nameValidateChecking();
+                emailValidateChecking();
+                phoneValidateChecking();
+                passValidateChecking();
+                if (
+                    !nameid ||
+                    !emailid ||
+                    !phoneid ||
+                    !passid ||
+                    !error1 ||
+                    !error2 ||
+                    !error3 ||
+                    !error4 ||
+                    !error5 ||
+                    !signform
+                ) {
+                    console.error("One or more elements not found")
+                }
+
+                if (
+                    error1.innerHTML ||
+                    error2.innerHTML ||
+                    error3.innerHTML ||
+                    error4.innerHTML ||
+                    error5.innerHTML
+                ) {
+                    e.preventDefault()
+                }
+
+
+            })
+
+        })
+    </script>
+</body>
