@@ -1,0 +1,206 @@
+<%- include("../../views/pratials/user/header") %>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    body {
+        background-color: #f1f3f6;
+        font-family: Arial, sans-serif;
+    }
+
+    .wishlist-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .wishlist-item {
+        border-bottom: 1px solid #ddd;
+        padding: 15px 0;
+    }
+
+    .wishlist-item:last-child {
+        border-bottom: none;
+    }
+
+    .product-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+
+    .action-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        cursor: pointer;
+    }
+
+    .action-btn.add-to-cart {
+        background-color: #28a745; /* Green for add to cart */
+        color: #fff;
+    }
+
+    .action-btn.add-to-cart:hover {
+        background-color: #218838;
+        color: #fff;
+    }
+
+    .action-btn.remove-from-wishlist {
+        background-color: #dc3545; /* Red for remove */
+        color: #fff;
+        margin-left: 10px;
+    }
+
+    .action-btn.remove-from-wishlist:hover {
+        background-color: #c82333;
+        color: #fff;
+    }
+</style>
+<div class="wishlist-container">
+    <h2>My Wishlist</h2>
+
+    <% if (wishlist.length > 0) { %>
+        <% wishlist.forEach(product => { %>
+            <div class="wishlist-item d-flex align-items-center" data-id="<%= product._id %>" 
+                data-name="<%= product.productName %>"
+                data-image="<%= product.productImage[0] || 'default.jpg' %>"
+                data-price="<%= product.salePrice %>"
+                data-quantity="1">
+                <img src="/uploads/re-image/<%= product.productImage[0] || 'default.jpg' %>" alt="Product Image" class="product-image">
+                <div class="ms-3">
+                    <h5><%= product.productName %></h5>
+                    <p>Price: ₹<%= product.salePrice %></p>
+                </div>
+                <div class="ms-auto">
+                    <button class="action-btn add-to-cart">Add to Cart</button>
+                    <button class="action-btn remove-from-wishlist">Remove</button>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <p>Your wishlist is empty. <a href="/shop">Continue Shopping</a></p>
+    <% } %>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Handle "Remove" Button Click
+    document.querySelectorAll('.remove-from-wishlist').forEach(button => {
+        button.addEventListener('click', async (event) => {
+            const item = event.target.closest('.wishlist-item');
+            const productId = item.dataset.id;
+
+            // Show SweetAlert confirmation dialog
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to undo this action!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, remove it!',
+            });
+
+            // If user confirms
+            if (result.isConfirmed) {
+                const response = await fetch(`/wishlist/removewishlist/${productId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                if (response.ok) {
+                    item.remove(); // Remove the item from the DOM
+                    Swal.fire(
+                        'Removed!',
+                        'The product has been removed from your wishlist.',
+                        'success'
+                    );
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        'Failed to remove the product from your wishlist. Please try again.',
+                        'error'
+                    );
+                }
+            }
+        });
+    });
+
+    // Handle "Add to Cart" Button Click
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', async (event) => {
+            const item = event.target.closest('.wishlist-item');
+            const productId = item.dataset.id;
+            const productName = item.dataset.name;
+            const productImage = item.dataset.image;
+            const salePrice = item.dataset.price;
+            const quantity = item.dataset.quantity;
+
+            // Get the flavours and weights values (you might have them stored or retrieved from somewhere)
+            const flavours = item.dataset.flavours || 'default_flavour';  // Replace with actual data or set a default
+            const weights = item.dataset.weights || 'default_weight';      // Replace with actual data or set a default
+
+            // Send data to the backend to add to the cart
+            const response = await fetch('/addCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    productId,
+                    quantity,
+                    productName,
+                    productImage,
+                    salePrice,
+                    flavours,  // Send flavours
+                    weights    // Send weights
+                })
+            });
+
+            if (response.ok) {
+                Swal.fire(
+                    'Added!',
+                    'The product has been added to your cart.',
+                    'success'
+                );
+
+                // After successful addition to the cart, remove it from the wishlist
+                const removeResponse = await fetch(`/wishlist/removewishlist/${productId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                if (removeResponse.ok) {
+                    item.remove(); // Remove the item from the DOM after it is removed from the wishlist
+                    Swal.fire(
+                        'added To cart',
+                        'added into the cart',
+                        'success'
+                    );
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        'Failed to remove the product from your wishlist. Please try again.',
+                        'error'
+                    );
+                }
+            } else {
+                Swal.fire(
+                    'Error!',
+                    'Failed to add the product to your cart. Please try again.',
+                    'error'
+                );
+            }
+        });
+    });
+
+</script>
+
+<%- include("../../views/pratials/user/footer") %>

@@ -4,6 +4,7 @@ const Product = require('../../models/productSchema');
 const Cart = require('../../models/cartSchema');
 const Order = require('../../models/orderSchema');
 const Address = require('../../models/addressSchema');
+const Coupon=require('../../models/couponSchema')
 
 const getCheckOutPage = async (req, res) => {
     const userId = req.session.user || req.session.passport?.user;
@@ -191,6 +192,74 @@ const editAddress = async (req, res) => {
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
+
+const applyCoupon = async (req, res) => {
+    const { couponCode, totalPrice, userId } = req.body;
+    console.log(req.body)
+
+    try {
+        // Validate couponCode
+        if (!couponCode) {
+            return res.status(400).json({ message: 'Coupon code is required.' });
+        }
+
+        // Fetch the coupon from the database
+        const coupon = await Coupon.findOne({ name: couponCode });
+
+        if (!coupon) {
+            return res.status(400).json({ message: 'The coupon code is invalid.' });
+        }
+
+        // Check if the coupon has expired
+        if (coupon.expireOn < new Date()) {
+            return res.status(400).json({ message: 'The coupon code has expired.' });
+        }
+
+        // Check if the coupon is still active
+        if (!coupon.isList) {
+            return res.status(400).json({ message: 'The coupon is no longer active.' });
+        }
+
+        // Check if the user is eligible to use this coupon
+        if (coupon.eligibleUsers.length > 0 && !coupon.eligibleUsers.includes(userId)) {
+            return res.status(400).json({ message: 'You are not eligible to use this coupon.' });
+        }
+
+        // Ensure the total price meets the minimum requirement for the coupon
+        if (totalPrice < coupon.minimumPrice) {
+            return res.status(400).json({
+                message: `Order total must be at least ₹${coupon.minimumPrice} to use this coupon.`,
+            });
+        }
+
+        // Calculate the discount based on the coupon type
+        let discount = 0;
+        if (coupon.offerPrice > 0) {
+            // If the coupon offers a flat discount
+            discount = coupon.offerPrice;
+        } else if (coupon.discountPercentage > 0) {
+            // If the coupon offers a percentage discount
+            discount = (totalPrice * coupon.discountPercentage) / 100;
+        }
+
+        // Calculate the new total price after applying the coupon discount
+        const newTotal = totalPrice - discount;
+
+        // Respond with the new total and discount
+        return res.status(200).json({
+            success: true,
+            message: 'Coupon applied successfully!',
+            newTotal: newTotal.toFixed(2),  // Round to 2 decimal places
+            discount: discount.toFixed(2), // Round to 2 decimal places
+        });
+
+    } catch (error) {
+        console.error('Error applying coupon:', error);
+        return res.status(500).json({ message: 'Internal server error. Please try again later.' });
+    }
+};
+
+
 const placeOrder = async (req, res) => {
     try {
         const userId = req.session.user  || req.session.passport?.user;
@@ -307,4 +376,5 @@ module.exports = {
     editAddress,
     placeOrder,
     orderConformation,
+    applyCoupon
 };

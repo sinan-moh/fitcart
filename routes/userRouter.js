@@ -6,6 +6,7 @@ const cartController    = require("../controllers/user/cartControllers")
 const productController = require('../controllers/user/productController')
 const checkoutController= require('../controllers/user/checkoutController')
 const OrderController   = require('../controllers/user/orderController')
+const wishlistController= require('../controllers/user/wishlistController')
 const passport = require('passport')
 const { loginAuth, userAuth } = require("../middlewares/auth")
 const Order = require('../models/orderSchema')
@@ -29,17 +30,22 @@ router.get("/auth/google/callback", passport.authenticate("google", { failureRed
     res.redirect('/');
 });
 
-
+router.get("/wishlist",userAuth,wishlistController.loadWishlist)
+router.post('/addToWishlist',userAuth,wishlistController.addToWishlist)
+router.delete('/wishlist/removewishlist/:id',userAuth,wishlistController.removeFromWishlist);
 router.get('/cart', userAuth, cartController.getCartPage);
 router.post('/addCart', userAuth, cartController.addCart);
 router.post('/updateQuantity', userAuth, cartController.updateQuantity);
 router.post('/removeCartItem', userAuth, cartController.removeItem);
-router.post('/applyCartCoupon', userAuth, cartController.applyCoupon);
+
 
 router.get('/check-out',userAuth,checkoutController.getCheckOutPage)
 router.post('/add-address', userAuth, checkoutController.addAddress);
 router.put('/edit-address/:id', userAuth, checkoutController.editAddress);
 router.post('/place-order',userAuth,checkoutController.placeOrder)
+
+
+
 
 
 router.get('/myOrder',userAuth,OrderController.getOrdersPage)

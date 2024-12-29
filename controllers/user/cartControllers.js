@@ -138,7 +138,7 @@ const updateQuantity = async (req, res) => {
 
     // Ensure the quantity does not exceed stock
     if (quantity > product.quantity) {
-      return res.status(400).json({ message: `Cannot add more than ${product.stock} items to the cart.` });
+      return res.status(400).json({ message: `Cannot add more than ${product.quantity} items to the cart.` });
     }
 
     // Find the item in the cart
@@ -209,47 +209,14 @@ const removeItem = async (req, res) => {
   }
 };
 
-// Apply Coupon to Cart
-const applyCoupon = async (req, res) => {
-  const { couponCode } = req.body;
-  const userId = req.session.user || req.session.passport?.user;
 
-  // Example: Assume a 10% discount for any valid coupon
-  const discount = couponCode === 'DISCOUNT10' ? 0.10 : 0;
-
-  try {
-    const cart = await Cart.findOne({ userId });
-
-    if (!cart) {
-      return res.status(404).send('Cart not found');
-    }
-
-    // Calculate subtotal, discount, and total price
-    const subtotal = cart.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-    const discountAmount = subtotal * discount;
-    const total = subtotal - discountAmount;
-
-    // Prepare the totals to be passed to the view
-    const totals = {
-      subtotal: subtotal.toFixed(2),
-      discount: discountAmount.toFixed(2),
-      total: total.toFixed(2)
-    };
-
-    // Render the cart page with updated totals
-    res.render('cart', { cartItems: cart.items, totals });
-  } catch (error) {
-    console.error(error);
-    res.redirect('/pageNotFound');
-  }
-};
 
 module.exports = {
   getCartPage,
   addCart,
   updateQuantity,
   removeItem,
-  applyCoupon
+
 };
 
 

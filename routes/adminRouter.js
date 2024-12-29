@@ -8,6 +8,7 @@ const {userAuth,adminAuth}=require("../middlewares/auth")
 const brandController=require("../controllers/admin/brandController")
 const productController=require("../controllers/admin/productController")
 const bannerController=require("../controllers/admin/bannerController")
+const couponController =require('../controllers/admin/couponController')
 const orderController=require("../controllers/admin/orderController")
 const storage=require("../helpers/multer");
 const uploads= multer({storage:storage})
@@ -55,10 +56,9 @@ router.get('/deleteBanner',adminAuth,bannerController.deleteBanner)
 router.get('/orderList',adminAuth,orderController.getOrderlist)
 router.post('/updateOrderStatus',adminAuth,orderController.updateOrderStatus)
 
-
-
-
-
-
-
+router.get('/coupon',adminAuth,couponController.loadCoupon)
+router.post('/createCoupon',adminAuth,couponController.createCoupon)
+router.get('/editCoupon',adminAuth,couponController.editCoupon)
+router.post('/updatecoupon',adminAuth,couponController.updateCoupon)
+router.post('/deletecoupon',adminAuth,couponController.deleteCoupon)
 module.exports=router;

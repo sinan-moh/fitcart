@@ -251,14 +251,22 @@
                             <p>Brand: <%= products[i].brand %>
                             </p>
                             <p>₹<%= products[i].salePrice.toLocaleString('en-IN') %>
-                                    <span class="text-muted">
-                                        <strike>₹<%= products[i].regularPrice.toLocaleString('en-IN') %></strike>
-                                    </span>
+                                    <span class="text-muted"><strike>₹<%=
+                                                products[i].regularPrice.toLocaleString('en-IN') %></strike></span>
                             </p>
                         </a>
-                        <a href="/cart"><button class="add-to-cart-btn" onclick="addToCart('<%= products[i].id %>')">Add to
-                            Cart</button></a>
+                        <!-- Pass all relevant data to addToCart function -->
+                        <a href="javascript:void(0);" class="add-to-cart-btn" onclick="addToCart(
+                                '<%= products[i]._id %>', 1, 
+                                '<%= products[i].flavours %>', 
+                                '<%= products[i].weights %>', 
+                                '<%= products[i].productName %>', 
+                                '<%= products[i].productImage[0] %>', 
+                                '<%= products[i].regularPrice %>', 
+                                '<%= products[i].salePrice %>', 
+                                '<%= products[i].discount %>')">Add to Cart</a>
                     </div>
+
                     <% } %>
             </div>
 
@@ -281,12 +289,94 @@
         </div>
     </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-        function addToCart(productId) {
-            console.log('Add to cart:', productId);
+        
+
+        function addToCart(productId, quantity, flavours, weights, productName, productImage, regularPrice, salePrice, discount) {
+            // Send an AJAX request to add the product to the cart
+            $.ajax({
+                url: '/addCart',  // The route to your add-to-cart endpoint
+                method: 'POST',
+                data: {
+                    productId: productId,
+                    quantity: quantity,
+                    flavours: flavours[0],
+                    weights: weights[0],
+                    productName: productName,
+                    productImage: productImage,
+                    regularPrice: regularPrice,
+                    salePrice: salePrice,
+                    discount: discount
+                },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Added to Cart',
+                            text: response.message,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.message,
+                            icon: 'error',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                },
+                error: function (error) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'There was an error adding the product to your cart.',
+                        icon: 'error',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
         }
 
+
+
+
         function addToWishlist(productId) {
+            $.ajax({
+                url: "/addToWishlist",
+                method: 'POST',
+                data: { productId: productId },
+                success: (response) => {
+                    if (response.status) {
+
+                        Swal.fire({
+                            title: 'addted to wishlist',
+                            text: 'The product has been added to your wishlist',
+                            icon: 'success',
+                            time: 2000
+
+                        })
+                    } else {
+                        Swal.fire({
+                            title: 'Already in wishlist to wishlist',
+                            text: response.message,
+                            icon: 'error',
+                            time: 2000
+                        })
+                    }
+                },
+                error: (error) => {
+                    Swal.fire({
+                        title: 'Error',
+                        text: "there was an error adding the product to your wishlist ",
+                        icon: 'error',
+                        time: 2000
+                    })
+                }
+            })
             console.log('Add to wishlist:', productId);
         }
     </script>

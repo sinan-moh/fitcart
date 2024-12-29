@@ -49,7 +49,7 @@ const loadHomepage = async (req, res) => {
         });
 
         // Slice to get only the top 4 latest products
-        productData = productData.slice(0, 4);
+        productData = productData.slice(0, 6);
 
         if (user) {
             const userData = await User.findById(user._id);

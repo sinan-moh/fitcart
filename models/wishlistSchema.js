@@ -13,7 +13,7 @@ const {Schema}=mongoose;
         required:true
     },
     addedOn:{
-        typr:Date,
+        type:Date,
         default:Date.now
     }
  }]
