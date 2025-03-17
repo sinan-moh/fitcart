@@ -1,0 +1,168 @@
+<%- include("../../views/pratials/user/header") %>
+    <link rel="stylesheet" href="/css/userCss/wallet.css">
+    </head>
+
+    <body>
+
+
+        <!-- Address Page -->
+        <div class="address-container">
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <h3>Dashboard</h3>
+                <ul>
+                    <li><a href="/userProfile"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="/userAddress"><i class="fas fa-map-marker-alt"></i> My Address</a></li>
+                    <li><a href="/myOrder"><i class="fas fa-shopping-cart"></i> My Orders</a></li>
+                    <li><a href="/wallet" class="active"><i class="fas fa-wallet"></i> Wallet</a></li>
+                    <li><a href="/"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
+
+            <!-- Address Content -->
+            <div class="address-content h-50">
+
+                <!-- wallet starts -->
+                <div class="container py-5">
+                    <!-- Wallet Balance Card -->
+                    <div class="wallet-card shadow-lg mb-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <div>
+                                    <h6 class="text-white-50 mb-2">Available Balance</h6>
+                                    <h2 class="display-4  mb-0 text-white" id="balance">₹<%= wallet ? wallet.avaliableBalance.toFixed(2) : '0.00'  %>
+                                    </h2>
+                                </div>
+                                <span class="badge bg-white text-primary px-3 py-2 rounded-pill"
+                                    style="color: #0d6efd !important">
+                                    <i class="fas fa-wallet me-2" style="color: #0d6efd !important"></i>E-commerce
+                                    Wallet
+                                </span>
+                            </div>
+
+                            <div class="balance-stats mb-4">
+                                <div class="row g-0">
+                                    <div class="col-4 stat-item">
+                                        <div class="text-white-50 small">Total Purchase</div>
+                                        <div class="fw-bold">₹<%=totalPurchase %>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 stat-item">
+                                        <div class="text-white-50 small">Total Return</div>
+                                        <div class="fw-bold">₹ <%=totalReturn %>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 stat-item">
+                                        <div class="text-white-50 small">Cashback</div>
+                                        <div class="fw-bold">₹ <%=cashback %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="last-updated">
+                                <i class="fas fa-sync-alt me-2"></i>Last updated: January 2, 2025 at 10:45 AM
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <div class="transactions-container">
+                        <div>
+
+
+
+                        </div>
+                        <div class="p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0">Recent Transactions</h5>
+                            </div>
+
+                            <div class="transaction-list">
+
+                                <% if(wallet.length <=0){ %>
+
+                                    <div class="transaction-item credit bg-white border border-dark">
+                                        <div class="d-flex align-items-center ">
+
+
+                                            <div class="flex-grow-1 ">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="d-flex justify-content-center align-items-center">
+                                                        <h6 class="mb-1">No Transactions Found</h6>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <% }else{ %>
+
+                                        <% for(let transaction of wallet.transaction.reverse()){ %>
+                                            <div class="transaction-item credit bg-white">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="transaction-icon me-3">
+
+                                                        
+                                                        <% if(transaction.discription === "Return"){ %>
+                                                        <i class="fas fa-rotate-left"></i>
+                                                        <% }else if(transaction.discription === 'Cashback'){ %>
+                                                            <i class="fas fa-gift"></i>
+                                                        <% } else if(transaction.discription === 'Purchase'){ %>
+                                                            <i class="fas fa-shopping-bag"></i>
+                                                         <% }else{ %>
+                                                            <i class="fas fa-shopping-bag"></i>
+                                                            
+                                                        <% } %> 
+
+                                                    </div>
+                                                    
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <h6 class="mb-1">
+                                                                    <%= transaction.discription%> 
+                                                                </h6>
+                                                                <small class="text-muted"><%=transaction.discription %> processed</small>
+                                                            </div>
+                                                            <div class="text-end">
+
+                                                                <% if(transaction.transactionType === 'credit'){ %>
+                                                                <div class="text-success fw-bold" style="color: #198754 !important">₹<%=transaction.amount.toFixed(2) %></div>
+                                                                <% }else{ %>
+                                                                    <div class="text-success fw-bold" style="color: #dc3545 !important"><%=transaction.amount.toFixed(2)  %></div>
+                                                                 <% } %>
+
+
+                                                                <small class="text-muted"><%= transaction.date.toString().substring(3,15) %></small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <% } %>
+
+                                        <% } %>
+
+
+                                                   
+
+                            </div>
+                            <!-- transation list  -->
+
+
+                        </div>
+                    </div>
+                </div>
+                <!-- wallet ends -->
+
+
+            </div>
+        </div>
+
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+        <%- include("../../views/pratials/user/footer") %>

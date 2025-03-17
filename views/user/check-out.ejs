@@ -1,4 +1,5 @@
 <%- include("../../views/pratials/user/header") %>
+
     <!-- Font Awesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
@@ -371,6 +372,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <body>
+
         <div class="container">
             <!-- Left Section -->
             <div class="left-section">
@@ -402,22 +404,22 @@
                 <div class="section">
                     <% addresses.forEach(function (address) { %>
                         <div class="address-group">
-                            <input type="radio" id="address<%= address._id %>" name="address" <%=address.isSelected
-                                ? 'checked' : '' %> onclick="selectAddress('<%= address._id %>')">
-                                <label for="address<%= address._id %>">
-                                    <div>
-                                        <strong>
-                                            <%= address.name %> (<%= address.addressType %>)
-                                        </strong><br>
-                                        <span class="address-info">
-                                            <%= address.city %>, <%= address.state %> - <%= address.pincode %>
-                                        </span><br>
-                                        <span class="phone">Phone: <%= address.phone %></span>
-                                    </div>
-                                    <button class="btn-secondary"
-                                        onclick="openModal('<%= address._id %>', '<%= address.name %>', '<%= address.city %>', '<%= address.landmark %>', '<%= address.state %>', '<%= address.pincode %>', '<%= address.phone %>', '<%= address.altPhone %>', '<%= address.addressType %>')">Edit
-                                        Address</button>
-                                </label>
+                            <input type="radio" id="<%= address._id %>" name="address" <%=address.isSelected ? 'checked'
+                                : '' %> >
+                            <label for="address<%= address._id %>">
+                                <div>
+                                    <strong>
+                                        <%= address.name %> (<%= address.addressType %>)
+                                    </strong><br>
+                                    <span class="address-info">
+                                        <%= address.city %>, <%= address.state %> - <%= address.pincode %>
+                                    </span><br>
+                                    <span class="phone">Phone: <%= address.phone %></span>
+                                </div>
+                                <button class="btn-secondary"
+                                    onclick="openModal('<%= address._id %>', '<%= address.name %>', '<%= address.city %>', '<%= address.landmark %>', '<%= address.state %>', '<%= address.pincode %>', '<%= address.phone %>', '<%= address.altPhone %>', '<%= address.addressType %>')">Edit
+                                    Address</button>
+                            </label>
                         </div>
                         <% }); %>
                             <button class="btn-primary" onclick="openAddNewAddressModal()">+ Add a New Address</button>
@@ -452,58 +454,70 @@
                     <p>Price (<%= cartItems.length %> items): ₹<%= totals.subtotal %>
                     </p>
 
-                    <!-- Display Delivery Charge with strikethrough if discount applies -->
-
+                    <!-- Delivery Charge Section -->
                     <% if (totals.deliveryChargeDiscount> 0) { %>
                         <p>Delivery Charge:
                             <span class="original-price">₹65</span>
-                            <span class="discounted-price">₹0</span> <!-- Display reduced delivery charge -->
+                            <span class="discounted-price">₹0</span>
                         </p>
                         <% } else { %>
-                            <p>Delivery Charge: ₹65</p> <!-- Regular delivery charge if no discount -->
+                            <p>Delivery Charge: ₹65</p>
                             <% } %>
 
 
-                                <!-- Discount Section -->
-                                <% if (totals.discount> 0) { %>
-                                    <p>Discount:
-                                        <span class="original-price">₹<%= totals.subtotal %></span>
-                                        <span class="discounted-price">-₹<%= totals.discount %></span>
-                                    </p>
-                                    <% } else { %>
-                                        <p>Discount: 0%</p> <!-- Display 0% if no discount -->
-                                        <% } %>
+                                <!-- Total Payable Section -->
+                                <p class="total-payable">Total Payable: ₹<span id="totalPayable">
+                                        <%= finalPrice %>
+                                    </span>
+                                </p>
 
-                                            <!-- Total Payable Section -->
-                                            <p class="total-payable">Total Payable: ₹<%= totals.total %>
-                                            </p>
-                                            <div class="coupon-section">
+                                <!-- Coupon Section -->
+                                <div class="coupon-section">
+                                    <h3>Apply Coupon</h3>
+                                    <form method="POST" action="javascript:void(0)" onsubmit="applyCoupon()">
+                                        <input type="text" id="couponCode" name="couponCode"
+                                            placeholder="Enter coupon code" required class="coupon-input"
+                                            value="<%= coupon ? coupon.name : '' %>">
+                                        <button type="submit">Apply</button>
+                                    </form>
 
-                                                <h3>Apply Coupon</h3>
-                                                <form method="POST" action="javascript:void(0)"
-                                                    onsubmit="applyCoupon()">
-                                                    <input type="text" id="couponCode" name="couponCode"
-                                                        placeholder="Enter coupon code" required>
-                                                    <button type="submit">Apply</button>
-                                                </form>
-                                                <div id="coupon-message" style="display:none;">Coupon Applied
-                                                    Successfully!</div>
-                                                <div id="coupon-error" style="display:none; color:red;">Invalid Coupon
-                                                    Code.</div>
+                                    <!-- Success and Error Messages -->
+                                    <div id="coupon-message" style="display: none; color: green;">
+                                        Coupon applied successfully!
+                                    </div>
+                                    <div id="coupon-error" style="display: none; color: red;">
+                                        Invalid coupon code.
+                                    </div>
 
-                                          
+                                    <!-- Display Applied Coupon -->
+                                    <div id="applied-coupon" style="display: none; margin-top: 10px;">
+                                        <span>Applied Coupon: <strong id="appliedCouponCode"></strong></span>
+                                        <button onclick="removeCoupon()"
+                                            style="margin-left: 10px; color: red; background: none; border: none; cursor: pointer;">Remove</button>
+                                    </div>
+
+                                    <!-- Available Coupons -->
+                                    <div id="available-coupons">
+                                        <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal"
+                                            data-bs-target="#couponModal">
+                                            Show Available Coupons
+                                        </button>
+                                        <%- include("../../views/pratials/user/couponModal") %>
+                                            <ul id="couponList"></ul>
+                                    </div>
+                                </div>
+
+                </div>
+
+                <!-- Safe Payments Section -->
+                <div class="safe-payments">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Checkmark_green.svg/1200px-Checkmark_green.svg.png"
+                        alt="Check">
+                    Safe and Secure Payments. Easy returns. 100% Authentic products.
                 </div>
             </div>
-            <!-- Safe Payments Section -->
-            <div class="safe-payments">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Checkmark_green.svg/1200px-Checkmark_green.svg.png"
-                    alt="Check">
-                Safe and Secure Payments. Easy returns. 100% Authentic products.
-            </div>
-        </div>
-        </div>
 
-        <!-- Modal for Address Editing / Adding -->
+        </div>
         <!-- Modal for Address Editing / Adding -->
         <div class="modal" id="address-modal">
             <div class="modal-content">
@@ -543,8 +557,13 @@
                 </div>
             </div>
         </div>
+
+
         <!-- SweetAlert2 CDN -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script src="/js/user/payment.js"></script>
+        <script src="/js/user/coupon.js"></script>
 
 
         <script>
@@ -677,163 +696,10 @@
                         console.error(error);
                     });
             });
-            function placeOrder() {
-                const paymentMethod = document.getElementById('payment-method').value; // Get the selected payment method
-                const selectedAddress = getSelectedAddress(); // Get the selected address
 
-                if (!selectedAddress) {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Please select a valid address!',
-                        icon: 'error',
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
-                    return;
-                }
 
-                if (!paymentMethod || paymentMethod === "") {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Please select a payment method!',
-                        icon: 'error',
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
-                    return;
-                }
 
-                // Prepare order data
-                const orderData = {
-                    paymentMethod: paymentMethod,
-                    addressId: selectedAddress.id  // Address ID
-                };
 
-                // Send order data to the backend
-                fetch('/place-order', {
-                    method: 'POST',
-                    body: JSON.stringify(orderData),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then(response => response.json()) // Convert response to JSON
-                    .then(data => {
-                        console.log('Response from server:', data);  // Debugging log
-                        if (data.message) {
-                            Swal.fire({
-                                title: data.message, // Show success message
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                // Redirect to the order confirmation page using the orderId
-                                window.location.href = `/order-confirmation/`; // Adjust the URL path as needed
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'There was an error placing your order. Please try again.',
-                                icon: 'error',
-                                timer: 3000,
-                                showConfirmButton: false
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'There was an error placing your order. Please try again.',
-                            icon: 'error',
-                            timer: 3000,
-                            showConfirmButton: false
-                        });
-                        console.error(error);
-                    });
-            }
 
-            // Function to get the selected address
-            function getSelectedAddress() {
-                const selectedAddress = document.querySelector('input[name="address"]:checked');
-
-                if (selectedAddress) {
-                    const label = selectedAddress.closest('.address-group').querySelector('label');
-                    const addressName = label.querySelector('strong') ? label.querySelector('strong').textContent.trim() : 'No Name Found';
-
-                    console.log('Selected Address:', {
-                        id: selectedAddress.id,
-                        name: addressName
-                    });
-
-                    return {
-                        id: selectedAddress.id,
-                        name: addressName
-                    };
-                }
-
-                console.log('No address selected');
-                return null;
-            }
-         
-
-            // Apply Coupon
-            function applyCoupon() {
-                const couponCode = document.getElementById('couponCode').value;
-
-                if (!couponCode) {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Please enter a coupon code!',
-                        icon: 'error',
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
-                    return;
-                }
-
-                fetch('/apply-coupon', {
-                    method: 'POST',
-                    body: JSON.stringify({ couponCode }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'Coupon Applied!',
-                                text: `You saved ₹${data.discount}!`,
-                                icon: 'success',
-                                timer: 3000,
-                                showConfirmButton: false
-                            });
-
-                            document.getElementById('totalPayable').textContent = `₹${data.newTotal}`;
-                            document.getElementById('coupon-message').style.display = 'block';
-                            document.getElementById('coupon-error').style.display = 'none';
-                        } else {
-                            Swal.fire({
-                                title: 'Invalid Coupon',
-                                text: 'The coupon code is invalid or expired.',
-                                icon: 'error',
-                                timer: 3000,
-                                showConfirmButton: false
-                            });
-
-                            document.getElementById('coupon-error').style.display = 'block';
-                            document.getElementById('coupon-message').style.display = 'none';
-                        }
-                    })
-                    .catch(error => {
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Failed to apply coupon. Please try again.',
-                            icon: 'error',
-                            timer: 3000,
-                            showConfirmButton: false
-                        });
-                    });
-            }
         </script>
         <%- include("../../views/pratials/user/footer") %>

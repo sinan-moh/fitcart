@@ -1,10 +1,17 @@
-const { request } = require('express');
+const paymentController = require('../../controllers/user/paymentController')
+const walletController = require('../../controllers/user/walletController');
 const User = require('../../models/userSchema');
 const Product = require('../../models/productSchema');
 const Cart = require('../../models/cartSchema');
 const Order = require('../../models/orderSchema');
 const Address = require('../../models/addressSchema');
-const Coupon=require('../../models/couponSchema')
+const Coupon = require('../../models/couponSchema')
+const Wallet = require('../../models/walletSchema')
+const env = require("dotenv").config();
+const Razorpay = require("razorpay");
+
+
+
 
 const getCheckOutPage = async (req, res) => {
     const userId = req.session.user || req.session.passport?.user;
@@ -22,35 +29,45 @@ const getCheckOutPage = async (req, res) => {
 
         // Fetch user's cart
         const cart = await Cart.findOne({ userId }).populate('items.productId');
-        
+
         // If cart is empty, provide default values
         if (!cart || cart.items.length === 0) {
             return res.render('check-out', {
                 user,
                 cartItems: [],
                 totals: { subtotal: 0, tax: 0, total: 0, discount: 0, deliveryChargeDiscount: 0 },
-                paymentMethods: ['COD', 'UPI'],
+                paymentMethods: ['COD', 'Online-Payment','Wallet'],
                 shippingAddress: 'Please update your address.',
-                addresses: []  // Ensure addresses is passed as an empty array
+                addresses: [],
             });
         }
 
         // Fetch user's addresses
         const address = await Address.findOne({ userId });
         const addresses = address ? address.address : [];
-
+        const coupons = await Coupon.find({ isList: true }); 
+        
         // Calculate subtotal
-        const subtotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+        const finalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0) ;
+        
 
         // Check if the subtotal qualifies for free delivery
-        const deliveryChargeDiscount = subtotal > 5000 ? 65 : 0; // If subtotal > 5000, remove delivery charge
+        const deliveryChargeDiscount = finalPrice > 5000 ? 65 : 0;
 
-        // Calculate the discount if any (for example, you can apply a fixed discount here)
-        const discount = subtotal * 0.1; // 10% discount (just an example)
+      
+       
+       
+        const newTotal = finalPrice + (deliveryChargeDiscount > 0 ? 0 : 65); // Apply delivery charge if no discount
 
-        // Calculate total with discount and delivery charge adjustments
-        const total = subtotal - discount + (deliveryChargeDiscount > 0 ? 0 : 65); // Apply delivery charge discount if any
+        // if coupon applied feteching the detail of the coupon 
+        let coupon = false
+        if(cart.coupon){
+            coupon = await Cart.findOne({userId}).select('coupon').populate('coupon')
+        }
+        
 
+  
+        
         // Prepare response data
         const checkoutDetails = {
             user,
@@ -64,15 +81,17 @@ const getCheckOutPage = async (req, res) => {
                 weights: item.weights,
             })),
             totals: {
-                subtotal: subtotal.toFixed(2),
-                tax: (subtotal * 0.1).toFixed(2),  // Calculate tax (example: 10%)
-                total: total.toFixed(2),
-                discount: discount.toFixed(2),
+                subtotal: finalPrice.toFixed(2),
+                total: newTotal.toFixed(2),
                 deliveryChargeDiscount: deliveryChargeDiscount,
             },
-            paymentMethods: ['COD', 'UPI'],
+            paymentMethods: ['COD', 'Online Payment','Wallet'],
             shippingAddress: addresses.length ? addresses[0] : 'Please add an address.',
-            addresses,  // Pass the addresses to the view
+            addresses, 
+            coupons,
+            finalPrice:finalPrice,
+            coupon,
+    
         };
 
         // Render the checkout page
@@ -82,9 +101,6 @@ const getCheckOutPage = async (req, res) => {
         res.status(500).json({ error: 'Failed to load checkout page.' });
     }
 };
-
-
-
 
 
 // Add New Address
@@ -193,76 +209,20 @@ const editAddress = async (req, res) => {
     }
 };
 
-const applyCoupon = async (req, res) => {
-    const { couponCode, totalPrice, userId } = req.body;
-    console.log(req.body)
-
-    try {
-        // Validate couponCode
-        if (!couponCode) {
-            return res.status(400).json({ message: 'Coupon code is required.' });
-        }
-
-        // Fetch the coupon from the database
-        const coupon = await Coupon.findOne({ name: couponCode });
-
-        if (!coupon) {
-            return res.status(400).json({ message: 'The coupon code is invalid.' });
-        }
-
-        // Check if the coupon has expired
-        if (coupon.expireOn < new Date()) {
-            return res.status(400).json({ message: 'The coupon code has expired.' });
-        }
-
-        // Check if the coupon is still active
-        if (!coupon.isList) {
-            return res.status(400).json({ message: 'The coupon is no longer active.' });
-        }
-
-        // Check if the user is eligible to use this coupon
-        if (coupon.eligibleUsers.length > 0 && !coupon.eligibleUsers.includes(userId)) {
-            return res.status(400).json({ message: 'You are not eligible to use this coupon.' });
-        }
-
-        // Ensure the total price meets the minimum requirement for the coupon
-        if (totalPrice < coupon.minimumPrice) {
-            return res.status(400).json({
-                message: `Order total must be at least ₹${coupon.minimumPrice} to use this coupon.`,
-            });
-        }
-
-        // Calculate the discount based on the coupon type
-        let discount = 0;
-        if (coupon.offerPrice > 0) {
-            // If the coupon offers a flat discount
-            discount = coupon.offerPrice;
-        } else if (coupon.discountPercentage > 0) {
-            // If the coupon offers a percentage discount
-            discount = (totalPrice * coupon.discountPercentage) / 100;
-        }
-
-        // Calculate the new total price after applying the coupon discount
-        const newTotal = totalPrice - discount;
-
-        // Respond with the new total and discount
-        return res.status(200).json({
-            success: true,
-            message: 'Coupon applied successfully!',
-            newTotal: newTotal.toFixed(2),  // Round to 2 decimal places
-            discount: discount.toFixed(2), // Round to 2 decimal places
-        });
-
-    } catch (error) {
-        console.error('Error applying coupon:', error);
-        return res.status(500).json({ message: 'Internal server error. Please try again later.' });
-    }
-};
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET, // Replace with your Razorpay Secret Key
+});
 
 
 const placeOrder = async (req, res) => {
     try {
-        const userId = req.session.user  || req.session.passport?.user;
+
+        const { paymentMethod, addressId } = req.body;
+
+
+
+        const userId = req.session.user || req.session.passport?.user;
         if (!userId) {
             return res.status(401).json({ message: "User is not authenticated" });
         }
@@ -279,22 +239,36 @@ const placeOrder = async (req, res) => {
             return res.status(400).json({ message: "Your cart is empty" });
         }
 
-        // Fetch user's address
-        const address = await Address.findOne({ userId });
-        if (!address || !address.address || address.address.length === 0) {
-            return res.status(400).json({ message: "Please add an address to your account" });
-        }
 
-        // Get the first address (adjust if you want a specific address)
-        const shippingAddress = address.address[0];
-        console.log(shippingAddress);
-        
 
         // Calculate subtotal, discount, and final amount
-        const subtotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
-        const deliveryCharge = subtotal > 5000 ? 0 : 65; // Delivery charge
-        const discount = subtotal * 0.1; // 10% discount
-        const finalAmount = subtotal - discount + deliveryCharge;
+        const finalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+        let discount = 0
+        if (cart.coupon) {
+            const populatedCart = await Cart.findOne({ userId }).populate('coupon'); 
+            discount = populatedCart.coupon.offerPrice || 0; 
+
+        } else {
+            discount = 0;
+        }
+        
+
+        const deliveryCharge = finalPrice > 5000 ? 0 : 65; // Delivery charge
+        
+        const finalAmount = (finalPrice - discount) + deliveryCharge;
+         // **Restrict COD for orders above ₹2000**
+         if (paymentMethod === "cod" && finalAmount > 2000) {
+            return res.status(400).json({ message: "COD is not allowed for orders above ₹2000. Please choose another payment method." });
+        }
+
+        // **Check Wallet Balance Before Processing Wallet Payment**
+        if (paymentMethod === "wallet") {
+            const wallet = await Wallet.findOne({ userId });
+
+            if (!wallet || wallet.avaliableBalance < finalAmount) {
+                return res.status(400).json({ message: "Insufficient wallet balance" });
+            }
+        }
 
         // Prepare the ordered items
         const orderedItems = cart.items.map(item => ({
@@ -305,70 +279,101 @@ const placeOrder = async (req, res) => {
             weights: item.weights,
         }));
 
-        // Check stock availability and update stock
+
         for (const item of cart.items) {
             const product = item.productId;
             if (product.quantity < item.quantity) {
-                return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
+                return res.status(400).json({ message:`Insufficient stock for ${product.name}` });
             }
             product.quantity -= item.quantity; // Deduct the stock
             await product.save(); // Save the updated product
         }
 
-        // Get payment method from request body
-        const { paymentMethod } = req.body; // Payment method can be 'COD' or 'UPI'
+        //creating razorpay order
+        let order = {}
+        if (paymentMethod !== 'cod' || 'wallet') {
+            order = await paymentController.createPayment(finalAmount)
+            if (!order) {
+                return res.status(500).json({ message: 'Server error' });
+            }
+        };
+        
 
-        // Create a new order object
+
+        // Create new order without Razorpay
         const newOrder = new Order({
             userId,
             orderedItems,
-            totalPrice: subtotal,
+            totalPrice: finalPrice,
             discount,
             finalAmount,
-            address: shippingAddress, // Reference to Address model
+            address: addressId, // Reference to Address model
             invoiceDate: Date.now(),
-            status: 'Placed',
+            status: paymentMethod === 'cod' || 'wallet' ? 'Placed' : 'Payment Pending',
+            paymentId: paymentMethod !== 'cod'  || 'wallet'? order.orderId : null,
+            couponApplied:discount === 0 ? false : true
+            
         });
+         await Cart.updateOne({ userId },{$set:{coupon:null}});
+        
 
-        // Save the order
+
+        // Save the order object
         const savedOrder = await newOrder.save();
 
-        // Clear the cart after placing the order (optional)
-        await Cart.updateOne({ userId }, { $set: { items: [] } });
 
-        // Handle payment flow
-        if (paymentMethod.toUpperCase() === 'COD') {
-            res.status(200).json({
-                message: 'Order placed successfully. Please pay on delivery.',
-                orderId: savedOrder._id,
+        // Clear the cart after placing the order
+        await Cart.updateOne({ userId }, { $set: { items: [] } });
+         
+        if (paymentMethod === 'cod' ) {
+            return res.status(200).json({ message: 'order success', paymentMethord: 'cod' });
+
+        }else if(paymentMethod ==='wallet'){
+            await walletController.updateWallet(finalPrice , "debit", userId, "Purchase", order._id);
+            return res.status(200).json({ message: 'order success', paymentMethord: 'wallet' });
+           
+             
+
+        }else if (paymentMethod === 'online-payment') {
+
+            req.session.pendingOrder = { razorpayOrderId: order.orderId, userId }
+
+            return res.status(200).json({
+                orderId: order.orderId,
+                orderAmount: order.orderAmount,
+                RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+                userName: user.name,
+                email: user.email,
+                phoneNUmber: user.phone,
+                paymentMethord: 'online-payment'
             });
-        } else if (paymentMethod.toUpperCase() === 'UPI') {
-            res.status(200).json({
-                message: 'Redirecting to UPI payment gateway.',
-                orderId: savedOrder._id,
-                paymentLink: 'https://example-upi-payment.com', // Placeholder URL for UPI payment
-            });
-        } else {
-            res.status(400).json({ message: 'Invalid payment method.' });
-        }
+        };
+
+        return res.status(400).json({ message: 'something went wrong' })
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error placing order.', error: error.message });
     }
 };
 
-const orderConformation=async(req,res)=>{
+
+
+
+const orderConformation = async (req, res) => {
     try {
         const userId = req.session.user || req.session.passport?.user;;
-        const user= await Cart.findOne({ userId })
-        res.render('order-sucess',{user})
+        const user = await Cart.findOne({ userId })
+        res.render('order-sucess', { user })
     } catch (error) {
-        
+
         console.error(error);
         res.status(500).json({ message: 'Error placing order.', error: error.message });
     }
 }
-   
+
+
+
 
 module.exports = {
     getCheckOutPage,
@@ -376,5 +381,5 @@ module.exports = {
     editAddress,
     placeOrder,
     orderConformation,
-    applyCoupon
+    
 };

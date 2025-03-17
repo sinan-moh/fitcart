@@ -19,7 +19,7 @@ const login = async (req, res) => {
                 req.session.admin = true;
                 req.session.userId = admin._id;
                 console.log("hello i am here")
-                return res.redirect("/admin");
+                return res.redirect("/admin/dashboard");
 
             } else {
 

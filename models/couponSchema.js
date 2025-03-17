@@ -28,7 +28,7 @@ const couponSchema = new Schema({
         type: Boolean,
         default: true
     },
-    eligibleUsers: [ { // Changed 'userId' to 'eligibleUsers'
+    couponUsedBy: [ { 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }]

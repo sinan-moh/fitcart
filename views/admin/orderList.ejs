@@ -43,14 +43,17 @@
                                     <td><%= order.productNames %></td>
                                     <td id="status-<%= order.id %>"><%= order.status %></td>
                                     <td id="actions-<%= order.id %>">
-                                        <% if (order.status === 'Placed') { %>
+                                        <% if (order.status === 'Placed' ) { %>
                                             <button class="btn btn-success" onclick="updateOrderStatus('<%= order.id %>', 'Processing')">Accept</button>
                                             <button class="btn btn-danger" onclick="updateOrderStatus('<%= order.id %>', 'Rejected')">Reject</button>
                                         <% } else if (order.status === 'Processing') { %>
                                             <button class="btn btn-primary" onclick="updateOrderStatus('<%= order.id %>', 'Shipped')">Mark as Shipped</button>
                                         <% } else if (order.status === 'Shipped') { %>
                                             <button class="btn btn-info" onclick="updateOrderStatus('<%= order.id %>', 'Delivered')">Mark as Delivered</button>
-                                        <% } %>
+                                        <% }else if (order.status === 'Returning'){ %>
+                                            <button class="btn btn-danger" onclick="updateOrderStatus('<%= order.id %>', 'Returned')">collected Returned Product</button>
+
+                                            <% } %>
                                     </td>
                                 </tr>
                             <% }) %>
@@ -82,6 +85,8 @@
                     actionsCell.innerHTML = '<button class="btn btn-primary" onclick="updateOrderStatus(\'' + orderId + '\', \'Shipped\')">Shipped</button>';
                 } else if (newStatus === 'Shipped') {
                     actionsCell.innerHTML = '<button class="btn btn-info" onclick="updateOrderStatus(\'' + orderId + '\', \'Delivered\')">Delivered</button>';
+                } else if(newStatus === "Returning" ){
+                    actionsCell.innerHTML = '<button class="btn btn-info" onclick="updateOrderStatus(\''+ order.id  +'\',\'Returned\')">Returing</button>'; // Clear actions for Rejected or Delivered
                 } else {
                     actionsCell.innerHTML = ''; // Clear actions for Rejected or Delivered
                 }

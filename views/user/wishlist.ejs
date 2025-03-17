@@ -63,20 +63,23 @@
         color: #fff;
     }
 </style>
+
 <div class="wishlist-container">
     <h2>My Wishlist</h2>
 
     <% if (wishlist.length > 0) { %>
         <% wishlist.forEach(product => { %>
-            <div class="wishlist-item d-flex align-items-center" data-id="<%= product._id %>" 
-                data-name="<%= product.productName %>"
-                data-image="<%= product.productImage[0] || 'default.jpg' %>"
-                data-price="<%= product.salePrice %>"
-                data-quantity="1">
-                <img src="/uploads/re-image/<%= product.productImage[0] || 'default.jpg' %>" alt="Product Image" class="product-image">
+            <div class="wishlist-item d-flex align-items-center" data-id="<%= product.productId._id %>" 
+                data-name="<%= product.productId.productName %>"
+                data-image="<%= product.productId.productImage[0] || 'default.jpg' %>"
+                data-price="<%= product.productId.salePrice %>"
+                data-quantity="1"
+                data-flavours="<%= product.productId.flavours || 'default_flavour' %>"   
+                data-weights="<%= product.productId.weights || 'default_weight' %>">  
+                <img src="/uploads/re-image/<%= product.productId.productImage[0] || 'default.jpg' %>" alt="Product Image" class="product-image">
                 <div class="ms-3">
-                    <h5><%= product.productName %></h5>
-                    <p>Price: ₹<%= product.salePrice %></p>
+                    <h5><%= product.productId.productName %></h5>
+                    <p>Price: ₹<%= product.productId.salePrice %></p>
                 </div>
                 <div class="ms-auto">
                     <button class="action-btn add-to-cart">Add to Cart</button>
@@ -133,7 +136,6 @@
         });
     });
 
-    // Handle "Add to Cart" Button Click
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', async (event) => {
             const item = event.target.closest('.wishlist-item');
@@ -142,10 +144,8 @@
             const productImage = item.dataset.image;
             const salePrice = item.dataset.price;
             const quantity = item.dataset.quantity;
-
-            // Get the flavours and weights values (you might have them stored or retrieved from somewhere)
-            const flavours = item.dataset.flavours || 'default_flavour';  // Replace with actual data or set a default
-            const weights = item.dataset.weights || 'default_weight';      // Replace with actual data or set a default
+            const flavours = item.dataset.flavours;  // Get flavours from the data attribute
+            const weights = item.dataset.weights;    // Get weights from the data attribute
 
             // Send data to the backend to add to the cart
             const response = await fetch('/addCart', {
@@ -180,8 +180,8 @@
                 if (removeResponse.ok) {
                     item.remove(); // Remove the item from the DOM after it is removed from the wishlist
                     Swal.fire(
-                        'added To cart',
-                        'added into the cart',
+                        'Added to Cart',
+                        'The product has been added to your cart.',
                         'success'
                     );
                 } else {

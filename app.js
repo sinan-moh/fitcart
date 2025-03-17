@@ -50,6 +50,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', userRouter);
 app.use('/admin', adminRouter);
 
+
 // Start server
 const port = process.env.PORT || 3000; // Fallback to 3000 if not set in .env
 app.listen(port, () => {

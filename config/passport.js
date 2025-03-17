@@ -8,7 +8,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:5000/auth/google/callback", // Ensure this matches in Google Cloud Console
+      callbackURL: "http://fitcart.site/auth/google/callback", // Ensure this matches in Google Cloud Console
     },
     async (accessToken, refreshToken, profile, done) => {
       try {

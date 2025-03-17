@@ -10,12 +10,17 @@ const productController=require("../controllers/admin/productController")
 const bannerController=require("../controllers/admin/bannerController")
 const couponController =require('../controllers/admin/couponController')
 const orderController=require("../controllers/admin/orderController")
+const salesController =require("../controllers/admin/salesController")
+const dashboardController=require("../controllers/admin/dashboardController")
+
+
 const storage=require("../helpers/multer");
+const { render } = require('express/lib/response')
 const uploads= multer({storage:storage})
 router.get("/pageerror",adminController.pageerror)
 router.get("/login",adminController.loadLogin);
 router.post("/login",adminController.login);
-router.get("/",adminAuth,adminController.loadDashbord);
+
 router.get("/logout",adminController.logout)
 
 router.get("/users",adminAuth,customerController.customerInfo)
@@ -40,7 +45,7 @@ router.get("/deleteBrand",adminAuth,brandController.deleteBrand)
 router.get("/addProducts",adminAuth,productController.getProductAddPage)
 router.post("/addproducts",adminAuth,uploads.array("images",4),productController.addProducts)
 router.get("/products",adminAuth,productController.getAllProducts);
-router.post('/addProductOffer',adminAuth,productController.addProductOffer);
+router.post('/addProductOffer',adminAuth,productController.addProductOffer); 
 router.post('/removeProductOffer',adminAuth,productController.removeProductOffer)
 router.get('/blockProduct',adminAuth,productController.blockProduct)
 router.get('/unBlockProduct',adminAuth,productController.unBlockProduct)
@@ -61,4 +66,10 @@ router.post('/createCoupon',adminAuth,couponController.createCoupon)
 router.get('/editCoupon',adminAuth,couponController.editCoupon)
 router.post('/updatecoupon',adminAuth,couponController.updateCoupon)
 router.post('/deletecoupon',adminAuth,couponController.deleteCoupon)
+
+
+router.get("/dashboard",adminAuth,dashboardController.loadDashboard);
+
+router.get('/salesReport',adminAuth,salesController.salesReport)
+
 module.exports=router;

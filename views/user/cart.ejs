@@ -218,8 +218,8 @@
 
             if (response.ok) {
                 const result = await response.json();
-                document.getElementById(`total-price-${productId}`).textContent = `$${result.itemTotalPrice}`;
-                document.getElementById('total-price-summary').textContent = `$${result.totalPrice}`;
+                document.getElementById(`total-price-${productId}`).textContent = `₹${result.itemTotalPrice}`;
+                document.getElementById('total-price-summary').textContent = `₹${result.totalPrice}`;
                 document.querySelector('.summary-section .d-flex span:last-child').textContent = result.totalItems;
             } else {
                 const error = await response.json();

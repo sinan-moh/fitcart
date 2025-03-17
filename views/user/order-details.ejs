@@ -1,7 +1,6 @@
 <%- include("../../views/pratials/user/header") %>
 
 <style>
-
     .order-details-container {
         max-width: 1100px;
         margin: 40px auto;
@@ -106,11 +105,34 @@
         text-align: center;
         margin-top: 50px;
     }
+
+    .invoice-btn {
+        display: inline-block;
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 16px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-top: 20px;
+    }
+
+    .invoice-btn:hover {
+        background-color: #45a049;
+    }
+
+    .invoice-container {
+        text-align: center;
+        margin-top: 30px;
+    }
 </style>
 
 <div class="order-details-container">
     <% if (order) { %>
-        <!-- Order Header -->
         <div class="order-header">
             <h2>Order Details</h2>
             <span class="order-status <%= order.status.toLowerCase() %>">
@@ -118,38 +140,40 @@
             </span>
         </div>
 
-        <!-- Order Summary -->
         <div class="order-summary">
-            <p><strong>Order ID:</strong> <%= order.orderId %></p>
+            <p><strong>Order ID:</strong> <%= order._id %></p>
             <p><strong>Order Date:</strong> <%= new Date(order.createdOn).toLocaleDateString() %></p>
-            <p><strong>Total Price:</strong> $<%= order.totalPrice %></p>
+            <p><strong>Total Price:</strong> ₹<%= order.finalAmount %></p>
             <p><strong>Shipping Address:</strong></p>
-             <!-- Assuming we display the first address -->
-                <p><%= address.name %></p>
-                <p><%= address.addressType %> Address</p>
-                <p><%= address.landMark || 'N/A' %></p>
-                <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
-                <p><strong>Phone:</strong> <%= address.phone %></p>
-                <% if (address.altPhone) { %>
-                    <p><strong>Alternate Phone:</strong> <%= address.altPhone %></p>
-                <% } %>
-            
+            <p><%= address.name %></p>
+            <p><%= address.addressType %> Address</p>
+            <p><%= address.landMark || 'N/A' %></p>
+            <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
+            <p><strong>Phone:</strong> <%= address.phone %></p>
+            <% if (address.altPhone) { %>
+                <p><strong>Alternate Phone:</strong> <%= address.altPhone %></p>
+            <% } %>
         </div>
 
-        <!-- Ordered Items -->
         <div class="product-list">
             <% order.orderedItems.forEach(function(item) { %>
                 <div class="product-item">
                     <img src="/uploads/re-image/<%= item.product.productImage[0] || 'default.jpg' %>" alt="<%= item.product.name %>" class="product-image">
                     <div class="product-info">
-                        <span class="product-name"><%= item.product.prodectName %></span>
-                        <span><strong>Price:</strong> $<%= item.totalprice %></span>
+                        <span class="product-name"><%= item.product.productName %></span>
+                        <span><strong>Price:</strong> ₹<%= item.price %></span>
                         <span><strong>Quantity:</strong> <%= item.quantity %></span>
                         <span><strong>Weight:</strong> <%= item.weights || 'N/A' %></span>
                         <span><strong>Flavour:</strong> <%= item.flavours || 'N/A' %></span>
                     </div>
                 </div>
             <% }); %>
+        </div>
+
+        <div class="invoice-container">
+            <a href="/orders/invoice/<%= order._id %>" class="invoice-btn">
+                <i class="fa fa-download"></i> Download Invoice
+            </a>
         </div>
     <% } else { %>
         <p class="no-order-details">No details found for this order.</p>

@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Address = require("../../models/addressSchema");
 const Order = require("../../models/orderSchema");
+const walletController = require('../../controllers/user/walletController')
 const mongodb = require("mongodb");
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
@@ -31,7 +32,7 @@ const getOrderlist = async (req, res) => {
     } catch (error) {
         console.error('Error rendering order management page:', error.message);  // Log the actual error message
         res.status(500).send('Failed to load the order management page.');
-    }
+    } 
 };
 
 // Update order status based on request
@@ -40,7 +41,7 @@ const updateOrderStatus = async (req, res) => {
     console.log('Order ID:', orderId); // Useful for debugging
 
     // Valid statuses
-    const validStatuses = ['Placed','Processing', 'Shipped', 'Delivered', 'Rejected'];
+    const validStatuses = ['Placed','Processing', 'Shipped', 'Delivered', 'Rejected',"Returning","Returned"];
 
     // Check if the provided status is valid
     if (!validStatuses.includes(status)) {
@@ -61,6 +62,10 @@ const updateOrderStatus = async (req, res) => {
                 success: false,
                 message: `Order cannot be updated because it is already ${order.status}`,
             });
+        }
+        console.log(order.status)
+        if(order.status === 'Returning'){
+            await walletController.updateWallet(order.finalAmount,"credit",order.userId,"Return",order.orderId);
         }
 
         // Update the order status

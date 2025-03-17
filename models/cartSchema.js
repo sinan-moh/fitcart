@@ -25,10 +25,10 @@ const cartSchema = new Schema({
          required: true,
 
       },
-      weights: { 
+      weights: {
          type: String,
          required: true,
-       },
+      },
       totalPrice: {
          type: Number,
          required: true
@@ -41,7 +41,15 @@ const cartSchema = new Schema({
          type: String,
          default: "none"
       }
-   }]
+   }],
+   finalPrice: {
+      type: Number,
+      required: true
+   },
+   coupon: {
+      type: Schema.Types.ObjectId,
+      ref: "Coupon",
+   }
 })
 const Cart = mongoose.model("Cart", cartSchema);
 module.exports = Cart;

@@ -76,7 +76,7 @@ const updateCoupon=async(req,res)=>{
                 },
             },{new:true}
             )
-            if(updateCoupon !==null){
+            if(updateCoupon !== null){
                 res.send("coupon updated successfully")
             }else{
                 res.status(500).send("coupon update Faild")

@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const orderSchema = new Schema({
     orderId: {
         type: String,
-        default: () => uuidv4().substring(0,10).replace('-',''),
+        default: () => uuidv4().substring(0, 10).replace('-', ''),
         unique: true,
     },
     userId: {
@@ -61,12 +61,15 @@ const orderSchema = new Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Placed','Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+        enum: ['Placed', 'Processing', 'Payment Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returning', 'Returned'],
     },
     createdOn: {
         type: Date,
         default: Date.now,
         required: true,
+    },
+    paymentId: {
+        type: String
     },
     couponApplied: {
         type: Boolean,

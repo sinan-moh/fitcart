@@ -47,6 +47,7 @@ const addCategory = async (req, res) => {
         return res.status(500).json({ message: "internal server error" })
     }
 }
+
 const addCategoryOffer = async (req, res) => {
     try {
         const percentage = parseInt(req.body.percentage);
@@ -66,7 +67,7 @@ const addCategoryOffer = async (req, res) => {
         const categoryUpdateResult = await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
         for (const product of products) {
             product.productOffer = 0;
-            product.salePrice = product.regulerPrice;
+            product.salePrice = product.regularPrice;
             await product.save();
         }
 
@@ -91,7 +92,7 @@ const removeCategoryOffer = async (req, res) => {
 
         if (products.length > 0) {
             for (const product of products) {
-                product.salePrice += Math.floor(product.regulerPrice * (percentage / 100))
+                product.salePrice += Math.floor(product.regularPrice * (percentage / 100))
                 product.productOffer = 0
                 await product.save();
             }
@@ -156,15 +157,6 @@ const editCategory= async (req,res)=>{
 }
 
 
-
-
-
-
-
-
-
-
-
 module.exports = {
     categoryInfo,
     addCategory,
@@ -177,5 +169,3 @@ module.exports = {
 
 
 }
-
-

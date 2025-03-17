@@ -1,10 +1,398 @@
-<%- include("../../views/pratials/admin/header") %>
-<section class="content-main">
-    <div class="content-header">
-        <div>
-            <h2 class="content-title card-title">Dashboard </h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --success-color: #4CC9F0;
+      --warning-color: #F72585;
+      --info-color: #7209B7;
+      --text-dark: #2b2d42;
+      --bg-light: #f8f9fa;
+      --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+      --hover-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    body {
+      background-color: var(--bg-light);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-dark);
+    }
+    
+    .container {
+      margin-top: 30px;
+      padding-bottom: 50px;
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: linear-gradient(45deg, var(--primary-color), var(--info-color));
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 40px;
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(45deg, var(--warning-color), var(--info-color));
+      border-radius: 2px;
+    }
+
+    /* Card Styling */
+    .card {
+      transition: all 0.4s ease;
+      border-radius: 20px;
+      overflow: hidden;
+      border: none;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 30px;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .card-body {
+      text-align: center;
+      padding: 30px;
+    }
+
+    .stat-card .card-body {
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.2) 100%);
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-title i {
+      margin-right: 10px;
+      font-size: 1.5rem;
+      opacity: 0.9;
+    }
+
+    .card-text {
+      font-weight: 600;
+      font-size: 2.5rem !important;
+      margin-bottom: 0;
+    }
+
+    /* Custom card backgrounds */
+    .bg-primary {
+      background: linear-gradient(135deg, var(--primary-color), #3a0ca3) !important;
+    }
+    
+    .bg-success {
+      background: linear-gradient(135deg, var(--success-color), #4895ef) !important;
+    }
+    
+    .bg-warning {
+      background: linear-gradient(135deg, var(--warning-color), #b5179e) !important;
+    }
+
+    /* Chart cards */
+    .chart-card {
+      background-color: white;
+    }
+    
+    .chart-card .card-title {
+      color: var(--text-dark);
+      border-bottom: 2px solid #eee;
+      padding-bottom: 15px;
+      margin-bottom: 25px;
+    }
+
+    /* Chart Styling */
+    canvas {
+      max-width: 100%;
+      height: auto !important;
+      margin: auto;
+      padding: 10px;
+    }
+    
+    /* Animation for numbers */
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .count-animation {
+      animation: countUp 1s ease-out forwards;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .card-text {
+        font-size: 2rem !important;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <%- include("../../views/pratials/admin/header") %>
+
+  <div class="container">
+    <h1>Admin Dashboard</h1>
+
+    <!-- Cards Section -->
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card text-white bg-primary stat-card">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-shopping-cart"></i> Total Orders</h5>
+            <p class="card-text fs-3 count-animation"><%- totalOrders %></p>
+          </div>
         </div>
-       
+      </div>
+
+      <div class="col-md-4">
+        <div class="card text-white bg-success stat-card">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-dollar-sign"></i> Total Profit</h5>
+            <p class="card-text fs-3 count-animation">₹ <%- totalProfit %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card text-white bg-warning stat-card">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-tags"></i> Total Discount</h5>
+            <p class="card-text fs-3 count-animation">₹ <%- totalDiscount %></p>
+          </div>
+        </div>
+      </div>
     </div>
-</section>
-<%- include("../../views/pratials/admin/footer") %>
+
+    <!-- Charts Section -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card chart-card">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-chart-bar"></i> Top 10 Ordered Products</h5>
+            <canvas id="productChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card chart-card">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-th-large"></i> Top 5 Categories</h5>
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card chart-card">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-chart-line"></i> Recent 5 Months Sales</h5>
+            <canvas id="recentSalesChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript for Charts -->
+  <script>
+    // Modern color palette
+    const colors = {
+      primary: ["rgba(67, 97, 238, 0.9)", "rgba(58, 12, 163, 0.9)"],
+      success: ["rgba(76, 201, 240, 0.9)", "rgba(72, 149, 239, 0.9)"],
+      warning: ["rgba(247, 37, 133, 0.9)", "rgba(181, 23, 158, 0.9)"],
+      chartColors: [
+        "rgba(67, 97, 238, 0.8)",
+        "rgba(76, 201, 240, 0.8)",
+        "rgba(247, 37, 133, 0.8)",
+        "rgba(114, 9, 183, 0.8)",
+        "rgba(58, 12, 163, 0.8)",
+      ]
+    };
+
+    // Animation for stat numbers
+    document.querySelectorAll('.count-animation').forEach(element => {
+      element.style.opacity = '0';
+      setTimeout(() => {
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0)';
+      }, 300);
+    });
+
+    // Create gradient for charts
+    function createGradient(ctx, colorArray) {
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, colorArray[0]);
+      gradient.addColorStop(1, colorArray[1]);
+      return gradient;
+    }
+
+    // Top 10 Ordered Products Chart
+    const productCtx = document.getElementById("productChart").getContext('2d');
+    new Chart(productCtx, {
+      type: "bar",
+      data: {
+        labels: <%- JSON.stringify(bestSellingProducts.map(p => p.productName)) %>,
+        datasets: [{
+          label: "Units Sold",
+          data: <%- JSON.stringify(bestSellingProducts.map(p => p.totalSold)) %>,
+          backgroundColor: createGradient(productCtx, colors.success),
+          borderWidth: 0,
+          borderRadius: 5,
+        }]
+      },
+      options: { 
+        responsive: true,
+        animation: { duration: 1500 },
+        plugins: {
+          legend: {
+            labels: {
+              font: {
+                family: "'Segoe UI', sans-serif",
+                weight: 'bold'
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(200, 200, 200, 0.2)',
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+
+    // Top 5 Categories Chart
+    const categoryCtx = document.getElementById("categoryChart");
+    new Chart(categoryCtx, {
+      type: "doughnut",
+      data: {
+        labels: <%- JSON.stringify(bestSellingCategories.map(c => c.categoryName)) %>,
+        datasets: [{
+          label: "Units Sold",
+          data: <%- JSON.stringify(bestSellingCategories.map(c => c.totalSold)) %>,
+          backgroundColor: colors.chartColors,
+          borderWidth: 3,
+          borderColor: '#ffffff',
+          hoverOffset: 15
+        }]
+      },
+      options: { 
+        responsive: true,
+        animation: { 
+          animateScale: true,
+          animateRotate: true,
+          duration: 2000
+        },
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              padding: 20,
+              font: {
+                family: "'Segoe UI', sans-serif",
+                size: 12,
+                weight: 'bold'
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Recent 5 Months Sales Chart
+    const salesCtx = document.getElementById("recentSalesChart").getContext('2d');
+    new Chart(salesCtx, {
+      type: "line",
+      data: {
+        labels: <%- JSON.stringify(recentSalesData.map(r => "Month " + r._id)) %>,
+        datasets: [{
+          label: "Sales (₹)",
+          data: <%- JSON.stringify(recentSalesData.map(r => r.totalSales)) %>,
+          backgroundColor: "rgba(114, 9, 183, 0.2)",
+          borderColor: createGradient(salesCtx, colors.warning),
+          borderWidth: 4,
+          pointBackgroundColor: "white",
+          pointBorderColor: colors.warning[0],
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: { 
+        responsive: true,
+        animation: { duration: 2000 },
+        plugins: {
+          legend: {
+            labels: {
+              font: {
+                family: "'Segoe UI', sans-serif",
+                weight: 'bold'
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(200, 200, 200, 0.2)',
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+  <%- include("../../views/pratials/admin/footer") %>
+</body>
+</html>

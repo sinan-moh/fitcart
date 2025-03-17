@@ -191,84 +191,134 @@
             background-color: #007bff;
             color: white;
         }
+
+         a.btn-wishlist {
+            text-decoration: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border: 1px solid #d8d8d8;
+            transition: all 0.3s ease-out;
+        }
+
+        a.btn-wishlist:hover {
+            background: rgb(240, 56, 56);
+            color: #fff;
+        }
     </style>
 
     <div class="main-container">
         <!-- Sidebar for Filters -->
         <aside class="sidebar">
-            <div class="filter-section">
-                <div class="filter-title">Categories</div>
-                <ul>
-                    <% for(let i=0;i<category.length;i++) { %>
-                        <li class="filter-item"><a href="/filter?category=<%= category[i]._id %>">
-                                <%= category[i].name %>
-                            </a></li>
-                        <% } %>
-                </ul>
-            </div>
+            <h4>Filter</h4>
 
-            <div class="filter-section">
-                <div class="filter-title">Brands</div>
-                <ul>
-                    <% for(let i=0;i<brand.length;i++) { %>
-                        <li class="filter-item"><a href="/filter?brand=<%= brand[i]._id %>">
-                                <%= brand[i].brandName %>
-                            </a></li>
-                        <% } %>
-                </ul>
-            </div>
+            <form action="/search" method="get" value="">
 
-            <div class="price-filter">
-                <div class="filter-title">Price Range</div>
-                <div class="price-options">
-                    <a href="/filterprice?gt=0&lt=500"><button class="price-button">Under ₹500</button></a>
-                    <a href="/filterprice?gt=500&lt=1000"><button class="price-button">₹500 - ₹1000</button></a>
-                    <a href="/filterprice?gt=1000&lt=1500"><button class="price-button">₹1000 - ₹1500</button></a>
-                    <a href="/filterprice?gt=1500&lt=1000000"><button class="price-button">Above ₹1500</button></a>
-                </div>
-            </div>
+                <div>Select Category</div>
+                <select class="form-select" name="searchCategory" aria-label="Default select example">
+                    <option value="" selected>Select Category</option>
+                    <% for (let ele of category) { %>
+                        <option value="<%= ele._id %>" <%= searchCategory === ele._id.toString() ? 'selected' : '' %> >
+                            <%= ele.name %>
+                        </option>
+                    <% } %>
+                </select>
+            
+                <div class="pt-3">Select Brand</div>
+                <select class="form-select" name="searchBrand" aria-label="Default select example">
+                    <option value="" selected>Select Brand</option>
+                    <% for (let i = 0; i < brand.length; i++) { %>
+                        <option value="<%= brand[i].brandName %>" <%= searchBrand === brand[i].brandName ? 'selected' : '' %> >
+                            <%= brand[i].brandName %>
+                        </option>
+                    <% } %>
+                </select>
+            
+                <input type="text" name="query" value="<%= query %>" hidden>
+            
+                <div class="pt-3">Select Price Range</div>
+                <select class="form-select" name="selectedPrice" aria-label="Select Price Range">
+                    <option value="" <%= !selectedPrice ? 'selected' : '' %>>Select Price Range</option>
+                    <option value="0-500" <%= selectedPrice === '0-500' ? 'selected' : '' %>>Under ₹500</option>
+                    <option value="500-1000" <%= selectedPrice === '500-1000' ? 'selected' : '' %>>₹500 - ₹1000</option>
+                    <option value="1000-1500" <%= selectedPrice === '1000-1500' ? 'selected' : '' %>>₹1000 - ₹1500</option>
+                    <option value="1500-2000" <%= selectedPrice === '1500-2000' ? 'selected' : '' %>>₹1500 - ₹2000</option>
+                    <option value="2000+" <%= selectedPrice === '2000+' ? 'selected' : '' %>>Above ₹2000</option>
+                </select>
+            
+                <button type="submit" class="btn btn-primary mt-3">Apply Filter</button>
+            </form>
+            
+            
         </aside>
+
+
+
 
         <!-- Main Product Grid -->
         <div class="product-grid-container">
             <div class="shop-topbar">
                 <form action="/search" method="GET" class="search-form">
-                    <input type="text" name="query" placeholder="Search items..." class="search-input">
+                    <input  type="text" 
+                    name="query" 
+                    placeholder="Search items..." 
+                    class="search-input" 
+                    value="<%= query || '' %>" 
+                    id="searchInput">
                     <button type="submit" class="search-button">Search</button>
                 </form>
             </div>
 
             <div class="product-grid">
-                <% for(let i=0;i<products.length;i++){ %>
+                <% products.forEach((product)=> { %>
                     <div class="product-card">
-                        <span class="wishlist-btn" onclick="addToWishlist('<%= products[i]._id %>')">❤️</span>
-                        <a href="/productDetails?id=<%= products[i]._id %>">
-                            <img src="/uploads/re-image/<%= products[i].productImage[0] %>"
-                                alt="<%= products[i].productName %>">
-                            <h4>
-                                <%= products[i].productName %>
-                            </h4>
-                            <p>Brand: <%= products[i].brand %>
-                            </p>
-                            <p>₹<%= products[i].salePrice.toLocaleString('en-IN') %>
-                                    <span class="text-muted"><strike>₹<%=
-                                                products[i].regularPrice.toLocaleString('en-IN') %></strike></span>
-                            </p>
-                        </a>
-                        <!-- Pass all relevant data to addToCart function -->
-                        <a href="javascript:void(0);" class="add-to-cart-btn" onclick="addToCart(
-                                '<%= products[i]._id %>', 1, 
-                                '<%= products[i].flavours %>', 
-                                '<%= products[i].weights %>', 
-                                '<%= products[i].productName %>', 
-                                '<%= products[i].productImage[0] %>', 
-                                '<%= products[i].regularPrice %>', 
-                                '<%= products[i].salePrice %>', 
-                                '<%= products[i].discount %>')">Add to Cart</a>
+                        <% if (wishlist && wishlist.products && wishlist.products.some(item=> item.productId.toString()
+                            === product._id.toString())) { %>
+                            <a href="#" class="btn-wishlist addToWishlist" data-product-id="<%= product._id %>"
+                                onclick="removeproduct('<%= product._id %>')">
+                                <span productId="<%= product._id %>">❤️</span>
+                            </a>
+                            <% } else { %>
+                                <a href="#" class="btn-wishlist removeproduct" data-product-id="<%= product._id %>"
+                              onclick="addToWishlist('<%= product._id %>')">
+                              <span class="heart-active" productId="<%= product._id %>">🤍</span>
+                            </a>
+                                <% } %>
+                                    <a href="/productDetails?id=<%= product._id %>">
+                                        <img src="/uploads/re-image/<%= product.productImage[0] %>"
+                                            alt="<%= product.productName %>">
+                                        <h4>
+                                            <%= product.productName %>
+                                        </h4>
+                                        <p>Brand: <%= product.brand %>
+                                        </p>
+                                        <p>₹<%= product.salePrice.toLocaleString('en-IN') %>
+                                                <span class="text-muted"><strike>₹<%=
+                                                            product.regularPrice.toLocaleString('en-IN') %>
+                                                            </strike></span>
+                                        </p>
+                                    </a>
+                                    <a href="javascript:void(0);" class="add-to-cart-btn" onclick="addToCart(
+                        '<%= product._id %>', 1, 
+                        '<%= product.flavours[0] %>', 
+                        '<%= product.weights[0] %>', 
+                        '<%= product.productName %>', 
+                        '<%= product.productImage[0] %>', 
+                        '<%= product.regularPrice %>', 
+                        '<%= product.salePrice %>', 
+                        '<%= product.discount %>')">Add to Cart</a>
                     </div>
-
-                    <% } %>
+                    <% }); %>
             </div>
+
+
 
             <!-- Pagination -->
             <div class="pagination">
@@ -289,10 +339,10 @@
         </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        
+
 
         function addToCart(productId, quantity, flavours, weights, productName, productImage, regularPrice, salePrice, discount) {
             // Send an AJAX request to add the product to the cart
@@ -302,8 +352,8 @@
                 data: {
                     productId: productId,
                     quantity: quantity,
-                    flavours: flavours[0],
-                    weights: weights[0],
+                    flavours: flavours,
+                    weights: weights,
                     productName: productName,
                     productImage: productImage,
                     regularPrice: regularPrice,
@@ -378,6 +428,42 @@
                 }
             })
             console.log('Add to wishlist:', productId);
+        }
+
+        function removeproduct(productId) {
+            $.ajax({
+                url: `/wishlist/removewishlist/${productId}`, // Include productId in the URL as per your backend
+                method: "DELETE", // Matches the backend HTTP method
+                success: (response) => {
+                    if (response.status) {
+                        Swal.fire({
+                            title: '',
+                            text: 'The product has been removed from your wishlist',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false,
+                        });
+
+                        // Optionally, remove the product from the UI
+                        $(`[data-product-id="${productId}"]`).closest('.product-card').remove();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.message || 'Failed to remove product from wishlist.',
+                            icon: 'error',
+                            showConfirmButton: false,
+                        });
+                    }
+                },
+                error: (error) => {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'There was an error removing the product from your wishlist.',
+                        icon: 'error',
+                        showConfirmButton: false,
+                    });
+                },
+            });
         }
     </script>
     <%- include("../../views/pratials/user/footer") %>

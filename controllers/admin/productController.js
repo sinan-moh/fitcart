@@ -4,7 +4,7 @@ const Brand = require("../../models/brandSchema")
 const fs = require("fs");
 const path = require("path")
 const sharp = require("sharp");
-const { log } = require("console");
+
 
 
 
@@ -247,28 +247,27 @@ const getEditProduct = async (req, res) => {
 
     }
 }
-
 const editProduct = async (req, res) => {
     try {
         const id = req.params.id;
 
-
         const product = await Product.findOne({ _id: id });
-        
+
         const data = req.body;
-        console.log(req.body)
-      
+        console.log("Request Data:", data);
 
         let categoryId = null;
         if (data.category) {
-            const category = await Category.findOne({ name: data.category }); // Find the category by name
+            console.log("Category ID from request:", data.category);
+
+            const category = await Category.findById(data.category); // Use ID instead of name
+
             if (!category) {
+                console.error("Category not found in DB");
                 return res.status(400).json({ error: "Invalid category provided." });
             }
-            categoryId = category._id; // Use the ObjectId from the category
+            categoryId = category._id;
         }
-
-
 
         // Check for product name conflict
         const existingProduct = await Product.findOne({
@@ -279,20 +278,13 @@ const editProduct = async (req, res) => {
             return res.status(400).json({ error: "Product with this name already exists. Please try another name." });
         }
 
-        const images = [];
-
-        if (req.files && req.files.length > 0) {
-            for (let i = 0; i < req.files.length; i++) {
-                images.push(req.files[i].filename);
-            }
-        }
-
+        const images = req.files?.map((file) => file.filename) || [];
 
         const updateFields = {
             productName: data.productName,
             description: data.descriptionData,
             brand: data.brand,
-            category: categoryId ,
+            category: categoryId,
             regularPrice: data.regularPrice,
             salePrice: data.salePrice,
             quantity: data.quantity,
@@ -300,23 +292,19 @@ const editProduct = async (req, res) => {
             weights: data.weights,
         };
 
-        // If new images are uploaded, push them into the productImage array
         if (req.files.length > 0) {
             updateFields.$push = { productImage: { $each: images } };
-
         }
 
-
-        // Update the product in the database
         await Product.findByIdAndUpdate(id, updateFields, { new: true });
 
-        // Redirect to the products page
         res.redirect('/admin/products');
     } catch (error) {
         console.error('Error updating product:', error);
         res.redirect('/admin/pageerror');
     }
 };
+
 
 
 const deleteSingleImage = async (req, res) => {

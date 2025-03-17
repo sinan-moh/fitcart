@@ -203,6 +203,16 @@
             text-align: center;
             margin-top: 50px;
         }
+
+        .button {
+            margin-top: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 8px;
+            display: inline-block;
+
+        }
     </style>
 
     <!-- Profile Page -->
@@ -214,165 +224,308 @@
                 <li><a href="/userprofile"><i class="fas fa-user"></i> Profile</a></li>
                 <li><a href="/userAdderss"><i class="fas fa-map-marker-alt"></i> My Address</a></li>
                 <li><a href="/my-orders" class="active"><i class="fas fa-shopping-cart"></i> My Orders</a></li>
-                <li><a href="#"><i class="fas fa-wallet"></i> Wallet</a></li>
+                <li><a href="/wallet"><i class="fas fa-wallet"></i> Wallet</a></li>
                 <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
 
- <!-- Main Profile Content -->
-<div class="profile-content">
-    <h2>My Orders</h2>
+        <!-- Main Profile Content -->
+        <div class="profile-content">
+            <h2>My Orders</h2>
 
-    <% if (orders && orders.length > 0) { %>
-        <% orders.forEach(function(order) { %>
-            <div class="order-details">
-                <h3>Order <%= order._id %></h3>
-                <p><strong>Order Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></p>
-                <p><strong>Status:</strong> 
-                    <span class="order-status <%= order.status.toLowerCase() %>">
-                        <%= order.status %>
-                    </span>
-                </p>
+            <% if (orders && orders.length> 0) { %>
+                <% orders.forEach(function(order) { %>
+                    <div class="order-details">
+                        <h3>Order <%= order._id %>
+                        </h3>
+                        <p><strong>Order Date:</strong>
+                            <%= new Date(order.createdOn).toLocaleDateString() %>
+                        </p>
+                        <p><strong>Status:</strong>
+                            <span class="order-status <%= order.status.toLowerCase() %>">
+                                <%= order.status %>
+                            </span>
+                        </p>
 
-                <!-- Conditional logic for different statuses -->
-                <div class="ordered-products">
-                    <% order.orderedItems.forEach(function(item) { %>
-                        <% if (item.status !== 'Cancelled') { %>
-                            <div class="product">
-                                <div class="product-info">
-                                    <span class="product-name"><%= item.product.productName %></span>
-                                    <span class="product-price">Price: <%= item.totalPrice %></span>
-                                    <span class="quantity">Qty: <%= item.quantity %></span>
-                                    <span class="weights">Weight: <%= item.weights %></span>
-                                    <span class="flavour">Flavour: <%= item.flavours %></span>
-                                    <span class="product-name"><%= item.product.name %></span>
-                                    <span class="date"><%= item.createdOn %></span>
-                                </div>
-                                <img src="/uploads/re-image/<%= item.product.productImage[0] || 'default.jpg' %>" alt="Product Image" class="product-image">
+                        <!-- Conditional logic for different statuses -->
+                        <div class="ordered-products">
+                            <% order.orderedItems.forEach(function(item) { %>
+                                <% if (item.status !=='Cancelled' ) { %>
+                                    <div class="product">
+                                        <div class="product-info">
+                                            <span class="product-name">
+                                                <%= item.product.productName %>
+                                            </span>
+                                            <span class="product-price">Price: <%= item.price %></span>
+                                            <span class="quantity">Qty: <%= item.quantity %></span>
+                                            <span class="weights">Weight: <%= item.weights %></span>
+                                            <span class="flavour">Flavour: <%= item.flavours %></span>
+                                            <span class="product-name">
+                                                <%= item.product.name %>
+                                            </span>
+                                            <span class="date">
+                                                <%= item.createdOn %>
+                                            </span>
+                                        </div>
+                                        <img src="/uploads/re-image/<%= item.product.productImage[0] || 'default.jpg' %>"
+                                            alt="Product Image" class="product-image">
 
-                                <!-- Cancel Product Button (Enabled if more than one item in order) -->
-                                <% if (order.orderedItems.length > 1 && order.status !== 'Cancelled') { %>
-                                    <button class="cancel-button" onclick="showRemoveProductModal('<%= order._id %>', '<%= item.product._id %>')">
-                                        Cancel Product
-                                    </button>
-                                <% } else { %>
-                                    <button class="cancel-button" disabled>Cancel Product</button>
-                                <% } %>
-                            </div>
-                        <% } %>
+                                        <!-- Cancel Product Button (Display only if product status is 'Placed') -->
+                                        <% if (order.orderedItems.length> 1 && order.status === 'Placed') { %>
+                                            <button class="cancel-button"
+                                                onclick="showRemoveProductModal('<%= order._id %>', '<%= item.product._id %>')">
+                                                Cancel Product
+                                            </button>
+                                            <% } %>
+
+                                    </div>
+                                    <% } %>
+                                        <% }); %>
+                        </div>
+
+                        <!-- Cancel Order Button with status checks -->
+                        <% if (order.status==='Placed' ) { %>
+                            <button class="cancel-button" onclick="showCancelModal('<%= order._id %>')">
+                                Cancel Order
+                            </button>
+                            <% } else if (order.status==='Shipped' ) { %>
+                                <span class="order-status shipped">Shipped</span>
+                                <% }else if (order.status==='Payment Pending' ) { %>
+                                    <button class="button" onclick="Repay('<%= order._id %>')">Repay</button>
+                                    <% } else if (order.status==='Delivered' ) { %>
+                                        <span class="order-status delivered">Delivered</span>
+
+                                        <!-- Add Return and Rating options for Delivered orders -->
+                                        <button class="return-button button"
+                                            onclick="showReturnOrderModal('<%= order._id %>')">
+                                            Return Product
+                                        </button>
+                                        <button class="rate-button button"
+                                            onclick="showRatingModal('<%= order._id %>')">
+                                            Rate Product
+                                        </button>
+                                        <% } else if (order.status==='Cancelled' ) { %>
+                                            <span class="order-status cancelled">Cancelled</span>
+                                            <% } %>
+
+                                                <!-- Order Details Button -->
+                                                <button class="details-button button"
+                                                    onclick="viewOrderDetails('<%= order._id %>')">
+                                                    View Details
+                                                </button>
+                    </div>
                     <% }); %>
-                </div>
-
-                <!-- Cancel Order Button with status checks -->
-                <% if (order.status === 'Placed') { %>
-                    <button class="cancel-button" onclick="showCancelModal('<%= order._id %>')">
-                        Cancel Order
-                    </button>
-                <% } else if (order.status === 'Shipped') { %>
-                    <span class="order-status shipped">Shipped</span>
-                <% } else if (order.status === 'Delivered') { %>
-                    <span class="order-status delivered">Delivered</span>
-
-                    <!-- Add Return and Rating options for Delivered orders -->
-                    <button class="return-button" onclick="showReturnModal('<%= order._id %>')">
-                        Return Product
-                    </button>
-                    <button class="rate-button" onclick="showRatingModal('<%= order._id %>')">
-                        Rate Product
-                    </button>
-                <% } else if (order.status === 'Cancelled') { %>
-                    <span class="order-status cancelled">Cancelled</span>
-                <% } %>
-
-                <!-- Order Details Button -->
-                <button class="details-button" onclick="viewOrderDetails('<%= order._id %>')">
-                    View Details
-                </button>
-            </div>
-        <% }); %>
-    <% } else { %>
-        <p class="no-orders">You have no orders yet.</p>
-    <% } %>
-</div>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.6/dist/sweetalert2.all.min.js"></script>
-
-    <script>
-        // Cancel Order function
-        async function showCancelModal(orderId) {
-            const response = await fetch(`/cancel-order/${orderId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // SweetAlert success message
-                Swal.fire({
-                    title: 'Success!',
-                    text: data.message,
-                    icon: 'success',
-                    confirmButtonText: 'Okay',
-                    confirmButtonColor: '#3085d6',
-                }).then(() => {
-                    location.reload(); // Reload page to reflect changes
-                });
-            } else {
-                // SweetAlert error message
-                Swal.fire({
-                    title: 'Error!',
-                    text: data.message,
-                    icon: 'error',
-                    confirmButtonText: 'Try Again',
-                    confirmButtonColor: '#d33',
-                });
-            }
-        }
-
-        // Remove Product from Order function
-        async function showRemoveProductModal(orderId, productId) {
-            const response = await fetch(`/remove-product/${orderId}/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // SweetAlert success message
-                Swal.fire({
-                    title: 'Success!',
-                    text: data.message,
-                    icon: 'success',
-                    confirmButtonText: 'Okay',
-                    confirmButtonColor: '#3085d6',
-                }).then(() => {
-                    location.reload(); // Reload page to reflect changes
-                });
-            } else {
-                // SweetAlert error message
-                Swal.fire({
-                    title: 'Error!',
-                    text: data.message,
-                    icon: 'error',
-                    confirmButtonText: 'Try Again',
-                    confirmButtonColor: '#d33',
-                });
-            }
-        }
-
-
-        async function viewOrderDetails(orderId) {
-    
-    window.location.href = `/order-details/${orderId}`;
-}
-               
-
-    </script>
-
-
-
-    <%- include("../../views/pratials/user/footer") %>
+                        <% } else { %>
+                            <p class="no-orders">You have no orders yet.</p>
+                            <% } %>
         </div>
+
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.6/dist/sweetalert2.all.min.js"></script>
+
+        <script>
+            // Cancel Order function
+            async function showCancelModal(orderId) {
+                // Show the confirmation prompt first
+                const result = await Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to undo this action!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, remove it!',
+                });
+
+                // If the user confirms the cancellation, proceed with the cancel order logic
+                if (result.isConfirmed) {
+                    const response = await fetch(`/cancel-order/${orderId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // SweetAlert success message
+                        Swal.fire({
+                            title: 'Success!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'Okay',
+                            confirmButtonColor: '#3085d6',
+                        }).then(() => {
+                            location.reload(); // Reload page to reflect changes
+                        });
+                    } else {
+                        // SweetAlert error message
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonText: 'Try Again',
+                            confirmButtonColor: '#d33',
+                        });
+                    }
+                } else {
+                    // SweetAlert message if the user cancels the action
+                    Swal.fire({
+                        title: 'Cancelled',
+                        text: 'The order cancellation has been cancelled.',
+                        icon: 'info',
+                        confirmButtonText: 'Okay',
+                        confirmButtonColor: '#3085d6',
+                    });
+                }
+            }
+
+
+            // Remove Product from Order function
+            async function showRemoveProductModal(orderId, productId) {
+                const response = await fetch(`/remove-product/${orderId}/${productId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // SweetAlert success message
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonText: 'Okay',
+                        confirmButtonColor: '#3085d6',
+                    }).then(() => {
+                        location.reload(); // Reload page to reflect changes
+                    });
+                } else {
+                    // SweetAlert error message
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonText: 'Try Again',
+                        confirmButtonColor: '#d33',
+                    });
+                }
+            }
+
+            async function showReturnOrderModal(orderId) {
+                const { value: reason } = await Swal.fire({
+                    title: 'Return Order',
+                    input: 'textarea',
+                    inputLabel: 'Reason for Return',
+                    inputPlaceholder: 'Write your reason here...',
+                    inputAttributes: {
+                        'aria-label': 'Reason for return'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit',
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                });
+
+                if (reason) {
+                    const response = await fetch(`/return-order/${orderId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reason }),
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'Okay',
+                            confirmButtonColor: '#3085d6',
+                        }).then(() => {
+                            location.reload(); // Reload to reflect changes
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonText: 'Try Again',
+                            confirmButtonColor: '#d33',
+                        });
+                    }
+                } else if (reason === '') {
+                    Swal.fire({
+                        title: 'Cancelled',
+                        text: 'You need to provide a reason for the return.',
+                        icon: 'info',
+                        confirmButtonText: 'Okay',
+                        confirmButtonColor: '#3085d6',
+                    });
+                }
+            }
+
+            function Repay(orderId) {
+                fetch(`/retry-payment/${orderId}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Redirect to Razorpay checkout page
+                            var options = {
+                                key: data.RAZORPAY_KEY_ID,
+                                amount: data.orderAmount,
+                                currency: "INR",
+                                name: "OxyFitness",
+                                description: "Order Repayment",
+                                order_id: data.orderId,
+                                handler: function (response) {
+                                    // Send response to server for verification
+                                    fetch("/verify-payment", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify(response),
+                                    })
+                                        .then(res => res.json())
+                                        .then(result => {
+                                            if (result.success) {
+                                                alert("Payment Successful!");
+                                                location.reload();
+                                            } else {
+                                                alert("Payment Failed. Please try again.");
+                                            }
+                                        });
+                                },
+                                theme: { color: "#3399cc" }
+                            };
+
+                            var rzp1 = new Razorpay(options);
+                            rzp1.open();
+                        } else {
+                            alert("Something went wrong. Please try again.");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            }
+
+
+
+
+
+            async function viewOrderDetails(orderId) {
+
+                window.location.href = `/order-details/${orderId}`;
+            }
+
+
+        </script>
+
+
+
+        <%- include("../../views/pratials/user/footer") %>
+    </div>

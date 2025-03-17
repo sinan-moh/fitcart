@@ -1,0 +1,102 @@
+<%- include("../../views/pratials/admin/header") %>
+
+<head>
+    <title>Sales Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+    <link rel="stylesheet" href="/css/adminCss/salesReport.css">
+</head>
+
+<body>
+    <div id="reportContent">
+        <div class="header">
+            <h1>Sales Report</h1>
+            <div class="export-buttons">
+                <button onclick="downloadCSV()" class="download-btn excel-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Download Excel
+                </button>
+                <button onclick="downloadPDF()" class="download-btn pdf-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Download PDF
+                </button>                
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="dateRange">Filter By Date Range:</label>
+                <select id="dateRange">
+                    <option value="day">Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+            </div>
+            
+            <div class="custom-date-filter" id="customDateFilter" style="display: none;">
+                <div class="date-input-group">
+                    <label for="startDate">From:</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="date-input-group">
+                    <label for="endDate">To:</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+            
+            <button class="apply-btn" id="applyFilterBtn">Apply Filter</button>
+        </div>
+
+        <table id="salesTable">
+            <thead>
+                <tr>
+                    <% const headers = ['Order ID', 'Total Amount', 'Coupon Discount', 'User Name', 'Date']; %>
+                    <% headers.forEach(header => { %>
+                        <th>
+                            <%= header %>
+                        </th>
+                    <% }) %>
+                </tr>
+            </thead>
+            <tbody>
+                <% sales.forEach(sale => { %>
+                    <tr>
+                        <td><%= sale.orderId %></td>
+                        <td>₹<%= sale.totalAmount.toFixed(2) %></td>
+                        <td><%= sale.offerDiscount ? `₹${sale.offerDiscount.toFixed(2)}` : 'No offers' %></td>
+                        <td><%= sale.userName %></td>
+                        <td><%= sale.date %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+        <div class="summary-section">
+            <div class="summary-box">
+                <h3>Total Sales</h3>
+                <p><%= summary.totalSales %></p>
+            </div>
+            <div class="summary-box">
+                <h3>Total Amount</h3>
+                <p>₹<%= summary.totalAmount.toFixed(2) %></p>
+            </div>
+            <div class="summary-box">
+                <h3>Total Discount</h3>
+                <p>₹<%= summary.totalDiscount.toFixed(2) %></p>
+            </div>
+        </div>
+    </div>
+      <script src="/js/admin/salesReport.js"></script>
+
+    <%- include("../../views/pratials/admin/footer") %>
+</body>

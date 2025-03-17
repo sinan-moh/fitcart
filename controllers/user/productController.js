@@ -12,7 +12,8 @@ const productDetails =async (req,res)=>{
         const findCategory = product.category;
         const categoryOffer = findCategory ?.categoryOffer|| 0;
         const productOffer =product.productOffer || 0;
-        const totalOffer=categoryOffer +productOffer;
+        const bestOfferType = categoryOffer > productOffer ? 'Category' : 'Product';
+        const bestOffer = Math.max(categoryOffer, productOffer);
         const relatedProducts = await Product.find({
             category: product.category, 
             _id: { $ne: product._id }   
@@ -23,7 +24,7 @@ const productDetails =async (req,res)=>{
             product:product,
             user:userData,
             quantity:product.quantity,
-            totalOffer:totalOffer,
+            totalOffer:bestOffer,
             category:findCategory,
             relatedProducts:relatedProducts,
 

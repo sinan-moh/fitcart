@@ -575,6 +575,7 @@ h1,h2,h3,h4,h5,h6 {
   height: auto;
 }
 .product-item .btn-wishlist {
+  text-decoration: none;
   position: absolute;
   top: 20px;
   right: 20px;
@@ -781,6 +782,16 @@ footer a:hover {
   display: block;
 
 }
+.wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(132, 123, 123, 0.8);
+  padding: 5px;
+  border-radius: 50%;
+  cursor: pointer;
+  
+}
 .header{
   position: relative;
   z-index: 500;
@@ -789,6 +800,342 @@ footer a:hover {
 /* product-thumbnail-slider */
 .product-thumbnail-slider {
   height: 740px;
+}
+.categories-section {
+  padding: 40px 20px;
+  background: #f8f9fa;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.section-header h2 {
+  font-size: 2rem;
+  color: #2d3436;
+  position: relative;
+}
+
+.section-header h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: #0984e3;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.nav-btn {
+  width: 45px;
+  height: 45px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  color: #2d3436;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.nav-btn:hover {
+  background: #0984e3;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.nav-btn:active {
+  transform: translateY(0);
+}
+
+.category-carousel {
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+.swiper-wrapper {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.swiper-slide {
+  flex: 0 0 auto;
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+.category-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.category-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.category-content {
+  padding: 15px 10px;
+}
+
+.category-content h3 {
+  margin: 0;
+  color: #2d3436;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.product-count {
+  display: block;
+  margin-top: 8px;
+  color: #636e72;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .section-header h2::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .category-card {
+    min-width: 150px;
+  }
+}
+
+/* Smooth scroll behavior */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+.brand-card {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 20px;
+}
+
+.brand-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.brand-logo-wrapper {
+  width: 100px;
+  height: 100px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #f8f9fa;
+}
+
+.brand-logo {
+  width: 80%;
+  height: auto;
+  transition: transform 0.3s ease-in-out;
+}
+
+.brand-logo:hover {
+  transform: scale(1.1);
+}
+
+.brand-name {
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+}
+.premium-banner {
+  padding: 3rem 0;
+  background-color: #f8f9fa;
+}
+
+.banner-wrapper {
+  position: relative;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.banner-slide {
+  position: relative;
+  min-height: 500px;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 2;
+}
+
+.banner-title {
+  color: #212529;
+  line-height: 1.2;
+}
+
+.banner-description {
+  color: #495057;
+  max-width: 90%;
+}
+
+.image-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image-bg-shape {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 120%;
+  height: 120%;
+  background: linear-gradient(135deg, #4158D0 0%, #C850C0 50%, #FFCC70 100%);
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  opacity: 0.8;
+}
+
+.image-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-image {
+  max-height: 500px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+  transform: scale(1);
+  transition: transform 0.5s ease;
+}
+
+.banner-image:hover {
+  transform: scale(1.05);
+}
+
+.btn-primary1 {
+  background: linear-gradient(to right, #4158D0 0%, #C850C0 100%);
+  color: #fff;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 14px rgba(0,0,0,0.1);
+}
+
+.banner-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+
+.swiper-pagination {
+  position: relative;
+  bottom: 0;
+}
+
+.swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background: rgba(255,255,255,0.8);
+  opacity: 0.7;
+}
+
+.swiper-pagination-bullet-active {
+  background: #fff;
+  opacity: 1;
+}
+
+.swiper-navigation {
+  display: flex;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+}
+
+.swiper-button-prev, .swiper-button-next {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  margin: 0 5px;
+  background-color: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  color: #212529;
+  transform: scale(0.7);
+}
+
+.swiper-button-prev:after, .swiper-button-next:after {
+  font-size: 18px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 991.98px) {
+  .banner-slide {
+      min-height: auto;
+  }
+  
+  .image-container {
+      min-height: 300px;
+      margin-top: 1rem;
+  }
+  
+  .image-bg-shape {
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+  }
+  
+  .banner-controls {
+      bottom: 10px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .banner-title {
+      font-size: 2rem;
+  }
+  
+  .banner-description {
+      font-size: 1rem;
+  }
+  
+  .image-container {
+      min-height: 250px;
+  }
 }
 @media screen and (max-width:992px) {
   .product-thumbnail-slider {

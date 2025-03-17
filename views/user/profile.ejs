@@ -192,17 +192,12 @@
             <!-- Details -->
             <div class="profile-details">
                 <h4>Personal Information</h4>
-                <p><strong>Phone:</strong>
-                    <%= user.phone || 'N/A' %>
-                </p>
-                <p><strong>Email:</strong>
-                    <%= user.email %>
-                </p>
-                <p><strong>Member Since:</strong>
-                    <%= user.createdOn ? user.createdOn.toISOString().split('T')[0] : 'N/A' %>
-                </p>
-
+                <p><strong>Phone:</strong> <%= user.phone || 'N/A' %></p>
+                <p><strong>Email:</strong> <%= user.email %></p>
+                <p><strong>Referral Code:</strong> <%= user.referalcode ? user.referalcode : 'N/A' %></p>
+                <p><strong>Member Since:</strong> <%= user.createdOn ? user.createdOn.toISOString().split('T')[0] : 'N/A' %></p>
             </div>
+            
 
             <!-- Actions -->
             <div class="profile-actions">
