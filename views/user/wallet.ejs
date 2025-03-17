@@ -80,7 +80,8 @@
 
                             <div class="transaction-list">
 
-                                <% if(wallet.length <=0){ %>
+                                <% if (!wallet || wallet.length === 0) { %>
+
 
                                     <div class="transaction-item credit bg-white border border-dark">
                                         <div class="d-flex align-items-center ">
