@@ -68,7 +68,7 @@ async function placeOrder() {
                 description: "Test Transaction",
                 order_id: data.orderId,
                 "redirect": true,
-                "callback_url": "http://localhost:5000/verify-payment" ,
+                "callback_url": "http://fitcart.site/verify-payment" ,
                 prefill: {
                     name: details.userName,
                     email: details.email,
