@@ -18,6 +18,8 @@ router.get('/pageNotFound', userController.pageNotFound)
 router.get("/", userController.loadHomepage)
 router.get('/shop', userAuth, userController.loadShoppingPage);
 router.get('/filter', userAuth, userController.filterProducts)
+router.get('/about-us',userAuth,userController.aboutus)
+router.get('/contact-us',userAuth,userController.contactus)
 
 router.get('/search', userAuth, userController.searchproduct)
 router.get("/login", loginAuth, userController.loadLogin)
@@ -56,9 +58,9 @@ router.get('/check-out', userAuth, checkoutController.getCheckOutPage)
 router.post('/add-address', userAuth, checkoutController.addAddress);
 router.put('/edit-address/:id', userAuth, checkoutController.editAddress);
 router.post('/place-order', userAuth, checkoutController.placeOrder)
-router.get('/order-confirmation', checkoutController.orderConformation)
+router.get('/order-confirmation',userAuth,checkoutController.orderConformation)
 //PAYMENT CONTROLLER
-router.post('/verify-payment', paymentController.verifyRazorpayPayment);
+router.post('/verify-payment', userAuth,paymentController.verifyRazorpayPayment);
 
 
 
@@ -69,6 +71,8 @@ router.post('/remove-product/:orderId/:productId', userAuth, OrderController.rem
 router.get('/order-details/:id', userAuth, OrderController.orderDetails)
 router.post('/return-order/:orderId',userAuth,OrderController.returnOrder)
 router.post("/retry-payment/:orderId",userAuth,OrderController.retryPayment);
+
+
 router.get("/orders/invoice/:orderId",userAuth,OrderController.invoiceDownload);
 
 

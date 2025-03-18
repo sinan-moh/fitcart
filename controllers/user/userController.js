@@ -570,6 +570,29 @@ const filterProducts = async (req, res) => {
     }
 };
 
+const aboutus = async (req, res) => {
+    try {
+        const user = req.session.user || req.session.passport?.user;
+        res.render("about-us",{
+            user: user,
+
+        })
+    } catch (error) {
+        res.redirect("/pageNotFound")
+    }
+}
+const contactus = async(req,res)=>{
+    try {
+        const user = req.session.user || req.session.passport?.user;
+        res.render("contact",{
+            user: user,
+
+        })
+        
+    } catch (error) {
+        
+    }
+}
 
 module.exports = {
     loadHomepage,
@@ -584,5 +607,7 @@ module.exports = {
     logout,
     loadShoppingPage,
     filterProducts,
-    searchproduct
+    searchproduct,
+    aboutus,
+    contactus
 }

@@ -309,11 +309,11 @@ const placeOrder = async (req, res) => {
             finalAmount,
             address: addressId, // Reference to Address model
             invoiceDate: Date.now(),
-            status: paymentMethod === 'cod' || 'wallet' ? 'Placed' : 'Payment Pending',
-            paymentId: paymentMethod !== 'cod'  || 'wallet'? order.orderId : null,
-            couponApplied:discount === 0 ? false : true
-            
+            status: (paymentMethod === 'cod' || paymentMethod === 'wallet') ? 'Placed' : 'Payment Pending',
+            paymentId: (paymentMethod !== 'cod' && paymentMethod !== 'wallet') ? order.orderId : null,
+            couponApplied: discount === 0 ? false : true
         });
+        
          await Cart.updateOne({ userId },{$set:{coupon:null}});
         
 
@@ -336,15 +336,21 @@ const placeOrder = async (req, res) => {
 
         }else if (paymentMethod === 'online-payment') {
 
-            req.session.pendingOrder = { razorpayOrderId: order.orderId, userId }
+            req.session.pendingOrder = { razorpayOrderId: order.orderId, userId, orderId: newOrder._id };
 
+            // Set the order status as "Payment Pending" initially
+            await Order.updateOne(
+                { _id: newOrder._id },
+                { $set: { status: "Payment Pending" } }
+            );
+        
             return res.status(200).json({
                 orderId: order.orderId,
                 orderAmount: order.orderAmount,
                 RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
                 userName: user.name,
                 email: user.email,
-                phoneNUmber: user.phone,
+                phoneNumber: user.phone,
                 paymentMethord: 'online-payment'
             });
         };

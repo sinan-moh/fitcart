@@ -73,7 +73,7 @@ const verifyRazorpayPayment = async (req, res) => {
 
             const orderId = order ? order.orderId : razorpay_order_id;
             const amount = order ? order.finalAmount || 0 : 0;
-            const status = "Failed"; 
+            const status = "Payment Pending"; 
 
             // Generate retry URL
             const retryUrl = `/retry-payment/${orderId}`;

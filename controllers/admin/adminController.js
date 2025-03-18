@@ -6,7 +6,7 @@ const loadLogin = (req, res) => {
         console.log(req.session.admin)
         return res.redirect("/admin/dashboard");
     }
-    res.render("admin-Login", { message: null });
+    res.render("admin-login", { message: null });
 };
 const login = async (req, res) => {
     try {
@@ -23,10 +23,10 @@ const login = async (req, res) => {
 
             } else {
 
-                return res.render("admin-Login", { message: "Incorrect password." });
+                return res.render("admin-login", { message: "Incorrect password." });
             }
         } else {
-            return res.render("admin-Login", { message: "Admin user not found." });
+            return res.render("admin-login", { message: "Admin user not found." });
         }
     } catch (error) {
         console.error("Login error:", error);
