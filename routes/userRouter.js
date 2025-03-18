@@ -73,7 +73,7 @@ router.post('/return-order/:orderId',userAuth,OrderController.returnOrder)
 router.post("/retry-payment/:orderId",userAuth,OrderController.retryPayment);
 
 
-router.get("/orders/invoice/:orderId",userAuth,OrderController.invoiceDownload);
+router.get("/orders/invoice/:orderId", OrderController.invoiceDownload);
 
 
 
