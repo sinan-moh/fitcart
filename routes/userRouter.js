@@ -60,7 +60,7 @@ router.put('/edit-address/:id', userAuth, checkoutController.editAddress);
 router.post('/place-order', userAuth, checkoutController.placeOrder)
 router.get('/order-confirmation',userAuth,checkoutController.orderConformation)
 //PAYMENT CONTROLLER
-router.post('/verify-payment', userAuth,paymentController.verifyRazorpayPayment);
+router.post('/verify-payment',paymentController.verifyRazorpayPayment);
 
 
 
