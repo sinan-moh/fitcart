@@ -50,36 +50,28 @@ const adminAuth = async (req, res, next) => {
         })
 }
 const loginAuth = async (req, res, next) => {
-    try {
-        const userId = req.session.user || req.session.passport?.user;
+  try {
+    const userId = req.session.user?._id;
 
-        if (!userId) {
-            return next(); // No user session, proceed to the next middleware
-        }
-
-        const user = await User.findById(userId);
-
-        if (user) {
-            if (user.isBlocked) {
-                // Redirect to login if the user is blocked
-                return res.redirect("/login");
-            }
-            // Redirect to the home page if the user is authenticated and not blocked
-            return res.redirect("/");
-        } else {
-            // If the user is not found, clear the session and redirect to login
-            req.session.destroy(() => {
-                return res.redirect("/login");
-            });
-        }
-    } catch (error) {
-        console.error("Error in user authentication middleware:", error);
-        res.status(500).send("Internal server error");
+    if (!userId) {
+      return next(); // No session, allow access to login/signup
     }
+
+    const user = await User.findById(userId);
+
+    if (!user || user.isBlocked) {
+      req.session.destroy(() => {
+        res.clearCookie("connect.sid"); // Clears session cookie
+        return res.redirect("/login");
+      });
+    } else {
+      return res.redirect("/"); // User is logged in and not blocked
+    }
+  } catch (err) {
+    console.error("Login Auth Middleware Error:", err);
+    return res.status(500).send("Internal server error");
+  }
 };
-
-
-
 module.exports = {
     userAuth,
     adminAuth,

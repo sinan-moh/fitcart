@@ -38,6 +38,11 @@ app.use((req, res, next) => {
   res.locals.user = req.user || null; // Ensures user is accessible in all views
   next();
 });
+// app.use((req, res, next) => {
+//   res.set('Cache-Control', 'no-store');
+//   next();
+// });
+
 
 // View engine setup
 app.set('view engine', 'ejs');

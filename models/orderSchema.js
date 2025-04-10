@@ -12,7 +12,7 @@ const orderSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,
-        index: true, // Optimizing queries
+        index: true,
     },
     orderedItems: [{
         product: {
@@ -30,11 +30,9 @@ const orderSchema = new Schema({
         },
         flavours: {
             type: String,
-            required: false, // Optional if not applicable for all products
         },
         weights: {
             type: String,
-            required: false, // Optional if not applicable for all products
         },
     }],
     totalPrice: {
@@ -49,7 +47,7 @@ const orderSchema = new Schema({
         type: Number,
         required: true,
     },
-    address: {  // Single Address
+    address: {
         type: Schema.Types.ObjectId,
         ref: 'Address',
         required: true,
@@ -63,9 +61,9 @@ const orderSchema = new Schema({
         required: true,
         enum: ['Placed', 'Processing', 'Payment Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returning', 'Returned'],
     },
-    createdOn: {
-        type: Date,
-        default: Date.now,
+    paymentMethod: { // ✅ NEW FIELD
+        type: String,
+        enum: ['cod', 'wallet', 'online-payment'],
         required: true,
     },
     paymentId: {
@@ -75,9 +73,12 @@ const orderSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    createdOn: {
+        type: Date,
+        default: Date.now,
+        required: true,
+    },
 });
 
-
 const Order = mongoose.model('Order', orderSchema);
-
 module.exports = Order;

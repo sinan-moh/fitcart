@@ -6,34 +6,45 @@ const walletController = require('../../controllers/user/walletController')
 const mongodb = require("mongodb");
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
-
-// Get all orders and render them in the order management view
 const getOrderlist = async (req, res) => {
     try {
-        // Fetch orders with populated user and product details
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10; // Set how many orders per page
+        const skip = (page - 1) * limit;
+
+        const totalOrders = await Order.countDocuments();
+        const totalPages = Math.ceil(totalOrders / limit);
+
         const orders = await Order.find()
             .populate('orderedItems.product')
-            .populate('userId', 'name');  // Fetch customer name
+            .populate('userId', 'name')
+            .sort({ createdOn: -1 })
+            .skip(skip)
+            .limit(limit);
 
-        if (!orders.length) {
-            return res.status(404).send('No orders found');
+        if (!orders.length && page > 1) {
+            return res.redirect(`/admin/orders?page=${page - 1}`);
         }
 
-        // Format orders to include necessary details
         const formattedOrders = orders.map(order => ({
             id: order.orderId,
-            customerName: order.userId?.name || 'Unknown',  // If name is not found, show 'Unknown'
-            productNames: order.orderedItems.map(item => item.product?.productName || 'Unknown').join(', '),  // Join product names if multiple products
+            customerName: order.userId?.name || 'Unknown',
+            productNames: order.orderedItems.map(item => item.product?.productName || 'Unknown').join(', '),
             status: order.status,
         }));
 
-        // Render the page with the formatted orders
-        res.render('orderList', { orders: formattedOrders });
+        res.render('orderList', {
+            orders: formattedOrders,
+            currentPage: page,
+            totalPages: totalPages
+        });
     } catch (error) {
-        console.error('Error rendering order management page:', error.message);  // Log the actual error message
+        console.error('Error rendering order management page:', error.message);
         res.status(500).send('Failed to load the order management page.');
-    } 
+    }
 };
+
+
 
 // Update order status based on request
 const updateOrderStatus = async (req, res) => {
@@ -85,8 +96,60 @@ const updateOrderStatus = async (req, res) => {
         });
     }
 };
+const getOrderDetails = async (req, res) => {
+    const orderId = req.params.orderId;
+
+    try {
+        let order;
+
+        if (mongoose.Types.ObjectId.isValid(orderId)) {
+            order = await Order.findOne({
+                $or: [
+                    { orderId: orderId },
+                    { _id: orderId }
+                ]
+            })
+                .populate('userId')
+                .populate('orderedItems.product')
+                .lean();
+        } else {
+            order = await Order.findOne({ orderId: orderId })
+                .populate('userId')
+                .populate('orderedItems.product')
+                .lean();
+        }
+
+        if (!order) {
+            return res.redirect('/pageerror');
+        }
+
+        // Get the user's address document
+        const addressDoc = await Address.findOne({ userId: order.userId }).lean();
+
+        if (!addressDoc || !addressDoc.address || addressDoc.address.length === 0) {
+            return res.status(404).render('page-404', { message: 'Address not found for this order.' });
+        }
+
+        // Find the specific address object from the array that matches order.address
+        const address = addressDoc.address.find(addr => addr._id.toString() === order.address.toString());
+
+        if (!address) {
+            return res.status(404).render('page-404', { message: 'Matching address not found in user address list.' });
+        }
+
+        // Attach to order object
+        order.fullAddress = address;
+
+        res.render('orderDetails', { order });
+    } catch (error) {
+        console.error('Error fetching order details:', error.message);
+        res.redirect('/pageerror');
+    }
+};
+
 
 module.exports = {
     getOrderlist,
     updateOrderStatus,
+    getOrderDetails
 };

@@ -60,12 +60,14 @@ router.get('/deleteBanner',adminAuth,bannerController.deleteBanner)
 
 router.get('/orderList',adminAuth,orderController.getOrderlist)
 router.post('/updateOrderStatus',adminAuth,orderController.updateOrderStatus)
+router.get('/ordersDetails/:orderId', adminAuth, orderController.getOrderDetails);
 
 router.get('/coupon',adminAuth,couponController.loadCoupon)
 router.post('/createCoupon',adminAuth,couponController.createCoupon)
 router.get('/editCoupon',adminAuth,couponController.editCoupon)
 router.post('/updatecoupon',adminAuth,couponController.updateCoupon)
 router.post('/deletecoupon',adminAuth,couponController.deleteCoupon)
+
 
 
 router.get("/dashboard",adminAuth,dashboardController.loadDashboard);

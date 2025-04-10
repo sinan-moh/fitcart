@@ -22,7 +22,7 @@ router.get('/about-us',userAuth,userController.aboutus)
 router.get('/contact-us',userAuth,userController.contactus)
 
 router.get('/search', userAuth, userController.searchproduct)
-router.get("/login", loginAuth, userController.loadLogin)
+router.get("/login",loginAuth, userController.loadLogin)
 router.post("/login", userController.login)
 router.get("/logout", userController.logout);
 router.get("/signup", loginAuth, userController.loadSignup)

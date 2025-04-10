@@ -218,47 +218,56 @@
         <!-- Sidebar for Filters -->
         <aside class="sidebar">
             <h4>Filter</h4>
-
-            <form action="/search" method="get" value="">
-
-                <div>Select Category</div>
-                <select class="form-select" name="searchCategory" aria-label="Default select example">
-                    <option value="" selected>Select Category</option>
-                    <% for (let ele of category) { %>
-                        <option value="<%= ele._id %>" <%= searchCategory === ele._id.toString() ? 'selected' : '' %> >
-                            <%= ele.name %>
-                        </option>
-                    <% } %>
-                </select>
-            
-                <div class="pt-3">Select Brand</div>
-                <select class="form-select" name="searchBrand" aria-label="Default select example">
-                    <option value="" selected>Select Brand</option>
-                    <% for (let i = 0; i < brand.length; i++) { %>
-                        <option value="<%= brand[i].brandName %>" <%= searchBrand === brand[i].brandName ? 'selected' : '' %> >
-                            <%= brand[i].brandName %>
-                        </option>
-                    <% } %>
-                </select>
-            
-                <input type="text" name="query" value="<%= query %>" hidden>
-            
-                <div class="pt-3">Select Price Range</div>
-                <select class="form-select" name="selectedPrice" aria-label="Select Price Range">
-                    <option value="" <%= !selectedPrice ? 'selected' : '' %>>Select Price Range</option>
-                    <option value="0-500" <%= selectedPrice === '0-500' ? 'selected' : '' %>>Under ₹500</option>
-                    <option value="500-1000" <%= selectedPrice === '500-1000' ? 'selected' : '' %>>₹500 - ₹1000</option>
-                    <option value="1000-1500" <%= selectedPrice === '1000-1500' ? 'selected' : '' %>>₹1000 - ₹1500</option>
-                    <option value="1500-2000" <%= selectedPrice === '1500-2000' ? 'selected' : '' %>>₹1500 - ₹2000</option>
-                    <option value="2000+" <%= selectedPrice === '2000+' ? 'selected' : '' %>>Above ₹2000</option>
-                </select>
-            
-                <button type="submit" class="btn btn-primary mt-3">Apply Filter</button>
+          
+            <form action="/search" method="get">
+              <!-- Category Filter -->
+              <div>Select Category</div>
+              <select class="form-select" name="searchCategory">
+                <option value="">Select Category</option>
+                <% for (let ele of category) { %>
+                  <option value="<%= ele._id %>" <%= searchCategory === ele._id.toString() ? 'selected' : '' %>><%= ele.name %></option>
+                <% } %>
+              </select>
+          
+              <!-- Brand Filter -->
+              <div class="pt-3">Select Brand</div>
+              <select class="form-select" name="searchBrand">
+                <option value="">Select Brand</option>
+                <% for (let i = 0; i < brand.length; i++) { %>
+                  <option value="<%= brand[i].brandName %>" <%= searchBrand === brand[i].brandName ? 'selected' : '' %>><%= brand[i].brandName %></option>
+                <% } %>
+              </select>
+          
+              <!-- Price Range Filter -->
+              <div class="pt-3">Select Price Range</div>
+              <select class="form-select" name="selectedPrice">
+                <option value="" <%= !selectedPrice ? 'selected' : '' %>>Select Price Range</option>
+                <option value="0-500" <%= selectedPrice === '0-500' ? 'selected' : '' %>>Under ₹500</option>
+                <option value="500-1000" <%= selectedPrice === '500-1000' ? 'selected' : '' %>>₹500 - ₹1000</option>
+                <option value="1000-1500" <%= selectedPrice === '1000-1500' ? 'selected' : '' %>>₹1000 - ₹1500</option>
+                <option value="1500-2000" <%= selectedPrice === '1500-2000' ? 'selected' : '' %>>₹1500 - ₹2000</option>
+                <option value="2000+" <%= selectedPrice === '2000+' ? 'selected' : '' %>>Above ₹2000</option>
+              </select>
+          
+              <!-- Sort Price -->
+              <div class="pt-3">Sort By Price</div>
+              <select class="form-select" name="priceSort">
+                <option value="">Select Sorting</option>
+                <option value="lowToHigh" <%= priceSort === 'lowToHigh' ? 'selected' : '' %>>Low to High</option>
+                <option value="highToLow" <%= priceSort === 'highToLow' ? 'selected' : '' %>>High to Low</option>
+              </select>
+          
+              <!-- Hidden Search Query -->
+              <input type="text" name="query" value="<%= query %>" hidden>
+          
+              <!-- Buttons -->
+              <div class="mt-3 d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">Apply Filter</button>
+                <a href="/shop" class="btn btn-secondary">Clear Filter</a>
+              </div>
             </form>
-            
-            
-        </aside>
-
+          </aside>
+          
 
 
 

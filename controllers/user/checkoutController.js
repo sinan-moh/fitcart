@@ -214,63 +214,44 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET, // Replace with your Razorpay Secret Key
 });
 
-
 const placeOrder = async (req, res) => {
     try {
-
         const { paymentMethod, addressId } = req.body;
-
-
-
         const userId = req.session.user || req.session.passport?.user;
-        if (!userId) {
-            return res.status(401).json({ message: "User is not authenticated" });
-        }
 
-        // Fetch user data
+        if (!userId) return res.status(401).json({ message: "User is not authenticated" });
+
         const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        if (!user) return res.status(404).json({ message: "User not found" });
 
-        // Fetch user's cart data
         const cart = await Cart.findOne({ userId }).populate('items.productId');
-        if (!cart || cart.items.length === 0) {
+        if (!cart || cart.items.length === 0)
             return res.status(400).json({ message: "Your cart is empty" });
-        }
 
-
-
-        // Calculate subtotal, discount, and final amount
         const finalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
-        let discount = 0
+
+        let discount = 0;
         if (cart.coupon) {
-            const populatedCart = await Cart.findOne({ userId }).populate('coupon'); 
-            discount = populatedCart.coupon.offerPrice || 0; 
-
-        } else {
-            discount = 0;
+            const populatedCart = await Cart.findOne({ userId }).populate('coupon');
+            discount = populatedCart.coupon?.offerPrice || 0;
         }
-        
 
-        const deliveryCharge = finalPrice > 5000 ? 0 : 65; // Delivery charge
-        
+        const deliveryCharge = finalPrice > 5000 ? 0 : 65;
         const finalAmount = (finalPrice - discount) + deliveryCharge;
-         // **Restrict COD for orders above ₹2000**
-         if (paymentMethod === "cod" && finalAmount > 2000) {
+
+        // Block COD if amount > 2000
+        if (paymentMethod === "cod" && finalAmount > 2000) {
             return res.status(400).json({ message: "COD is not allowed for orders above ₹2000. Please choose another payment method." });
         }
 
-        // **Check Wallet Balance Before Processing Wallet Payment**
+        // Check wallet balance
         if (paymentMethod === "wallet") {
             const wallet = await Wallet.findOne({ userId });
-
             if (!wallet || wallet.avaliableBalance < finalAmount) {
                 return res.status(400).json({ message: "Insufficient wallet balance" });
             }
         }
 
-        // Prepare the ordered items
         const orderedItems = cart.items.map(item => ({
             product: item.productId,
             quantity: item.quantity,
@@ -279,89 +260,84 @@ const placeOrder = async (req, res) => {
             weights: item.weights,
         }));
 
-
+        // Stock validation
         for (const item of cart.items) {
             const product = item.productId;
             if (product.quantity < item.quantity) {
-                return res.status(400).json({ message:`Insufficient stock for ${product.name}` });
+                return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
             }
-            product.quantity -= item.quantity; // Deduct the stock
-            await product.save(); // Save the updated product
+            product.quantity -= item.quantity;
+            await product.save();
         }
 
-        //creating razorpay order
-        let order = {}
-        if (paymentMethod !== 'cod' || 'wallet') {
-            order = await paymentController.createPayment(finalAmount)
-            if (!order) {
-                return res.status(500).json({ message: 'Server error' });
-            }
-        };
-        
+        // ✅ Razorpay logic if online payment
+        let razorOrder = null;
+        if (paymentMethod === 'online-payment') {
+            razorOrder = await paymentController.createPayment(finalAmount);
+            if (!razorOrder) return res.status(500).json({ message: 'Server error creating Razorpay order' });
+        }
 
-
-        // Create new order without Razorpay
         const newOrder = new Order({
             userId,
             orderedItems,
             totalPrice: finalPrice,
             discount,
             finalAmount,
-            address: addressId, // Reference to Address model
+            address: addressId,
             invoiceDate: Date.now(),
             status: (paymentMethod === 'cod' || paymentMethod === 'wallet') ? 'Placed' : 'Payment Pending',
-            paymentId: (paymentMethod !== 'cod' && paymentMethod !== 'wallet') ? order.orderId : null,
-            couponApplied: discount === 0 ? false : true
+            paymentId: (paymentMethod === 'online-payment') ? razorOrder.orderId : null,
+            couponApplied: discount !== 0,
+            paymentMethod, // ✅ Save the payment method here
         });
-        
-         await Cart.updateOne({ userId },{$set:{coupon:null}});
-        
 
-
-        // Save the order object
+        await Cart.updateOne({ userId }, { $set: { coupon: null } });
         const savedOrder = await newOrder.save();
-
-
-        // Clear the cart after placing the order
         await Cart.updateOne({ userId }, { $set: { items: [] } });
-         
-        if (paymentMethod === 'cod' ) {
+
+        // COD success
+        if (paymentMethod === 'cod') {
             return res.status(200).json({ message: 'order success', paymentMethord: 'cod' });
+        }
 
-        }else if(paymentMethod ==='wallet'){
-            await walletController.updateWallet(finalPrice , "debit", userId, "Purchase", order._id);
+        // Wallet success
+        if (paymentMethod === 'wallet') {
+            await walletController.updateWallet(finalPrice, "debit", userId, "Purchase", savedOrder._id);
             return res.status(200).json({ message: 'order success', paymentMethord: 'wallet' });
-           
-             
+        }
 
-        }else if (paymentMethod === 'online-payment') {
+        // Razorpay success
+        if (paymentMethod === 'online-payment') {
+            req.session.pendingOrder = {
+                razorpayOrderId: razorOrder.orderId,
+                userId,
+                orderId: savedOrder._id
+            };
 
-            req.session.pendingOrder = { razorpayOrderId: order.orderId, userId, orderId: newOrder._id };
-
-            // Set the order status as "Payment Pending" initially
             await Order.updateOne(
-                { _id: newOrder._id },
+                { _id: savedOrder._id },
                 { $set: { status: "Payment Pending" } }
             );
-        
+
             return res.status(200).json({
-                orderId: order.orderId,
-                orderAmount: order.orderAmount,
+                orderId: razorOrder.orderId,
+                orderAmount: razorOrder.orderAmount,
                 RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
                 userName: user.name,
                 email: user.email,
                 phoneNumber: user.phone,
                 paymentMethord: 'online-payment'
             });
-        };
+        }
 
-        return res.status(400).json({ message: 'something went wrong' })
+        return res.status(400).json({ message: 'Something went wrong' });
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error placing order.', error: error.message });
+        return res.status(500).json({ message: 'Error placing order.', error: error.message });
     }
 };
+
 
 
 

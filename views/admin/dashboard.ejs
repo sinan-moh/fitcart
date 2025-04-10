@@ -260,49 +260,77 @@
       gradient.addColorStop(1, colorArray[1]);
       return gradient;
     }
-
-    // Top 10 Ordered Products Chart
-    const productCtx = document.getElementById("productChart").getContext('2d');
-    new Chart(productCtx, {
-      type: "bar",
-      data: {
-        labels: <%- JSON.stringify(bestSellingProducts.map(p => p.productName)) %>,
-        datasets: [{
-          label: "Units Sold",
-          data: <%- JSON.stringify(bestSellingProducts.map(p => p.totalSold)) %>,
-          backgroundColor: createGradient(productCtx, colors.success),
-          borderWidth: 0,
-          borderRadius: 5,
-        }]
+// Top 10 Ordered Products Chart
+const productCtx = document.getElementById("productChart").getContext('2d');
+new Chart(productCtx, {
+  type: "bar",
+  data: {
+    labels: <%- JSON.stringify(bestSellingProducts.map(p => p.productName)) %>,
+    datasets: [{
+      label: "Units Sold",
+      data: <%- JSON.stringify(bestSellingProducts.map(p => p.totalSold)) %>,
+      backgroundColor: createGradient(productCtx, colors.success),
+      borderWidth: 0,
+      borderRadius: 5,
+    }]
+  },
+  options: { 
+    responsive: true,
+    animation: { duration: 1500 },
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: "Top 10 Ordered Products",
+        font: {
+          size: 18,
+          family: "'Segoe UI', sans-serif"
+        }
       },
-      options: { 
-        responsive: true,
-        animation: { duration: 1500 },
-        plugins: {
-          legend: {
-            labels: {
-              font: {
-                family: "'Segoe UI', sans-serif",
-                weight: 'bold'
-              }
-            }
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(200, 200, 200, 0.2)',
-            }
-          },
-          x: {
-            grid: {
-              display: false
-            }
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.parsed.y} units sold`;
           }
         }
       }
-    });
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(200, 200, 200, 0.2)',
+        },
+        title: {
+          display: true,
+          text: "Units Sold",
+          font: {
+            size: 14,
+            weight: "bold"
+          }
+        }
+      },
+      x: {
+        ticks: {
+          callback: function(value, index, ticks) {
+            const label = this.getLabelForValue(value);
+            return label.length > 15 ? label.slice(0, 15) + "…" : label;
+          },
+          autoSkip: false,
+          maxRotation: 40,
+          minRotation: 25,
+          font: {
+            size: 11,
+            family: "'Segoe UI', sans-serif"
+          }
+        },
+        grid: {
+          display: false
+        }
+      }
+    }
+  }
+});
 
     // Top 5 Categories Chart
     const categoryCtx = document.getElementById("categoryChart");

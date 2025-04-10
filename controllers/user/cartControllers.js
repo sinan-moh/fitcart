@@ -171,49 +171,41 @@ const addCart = async (req, res) => {
 
 const updateQuantity = async (req, res) => {
   const { productId, quantity } = req.body;
-
-
   const userId = req.session.user || req.session.passport?.user;
 
   try {
     const cart = await Cart.findOne({ userId });
     const product = await Product.findById(productId);
 
-    // Check if the product exists
     if (!product) {
       return res.status(404).send('Product not found');
     }
 
-    // Ensure the quantity does not exceed stock
+    // Stock check
     if (quantity > product.quantity) {
-      return res.status(400).json({ message: `Cannot add more than ${product.quantity} items to the cart.` });
+      return res.status(400).json({
+        message: `Cannot add more than ${product.quantity} items to the cart.`,
+      });
     }
 
-    // Find the item in the cart
     const item = cart.items.find(i => i.productId.toString() === productId);
-
     if (!item) return res.status(404).send('Item not found in cart');
 
-    // Update the quantity and calculate total price
     item.quantity = quantity;
     item.totalPrice = item.quantity * product.salePrice;
 
-    //calculating final price
     const finalPrice = cart.items.reduce((acc, item) => acc + item.totalPrice, 0);
     cart.finalPrice = finalPrice;
 
     await cart.save();
 
-    // Recalculate total cart values
     const totalItems = cart.items.reduce((acc, item) => acc + item.quantity, 0);
-    // const totalPrice = cart.items.reduce((acc, item) => acc + item.totalPrice, 0);
 
-    // Send back the updated values
     res.json({
       itemTotalPrice: item.totalPrice,
       totalItems,
-      totalPrice:finalPrice,
-      message: 'Cart updated successfully!'
+      totalPrice: finalPrice,
+      message: 'Cart updated successfully!',
     });
   } catch (err) {
     console.error(err);

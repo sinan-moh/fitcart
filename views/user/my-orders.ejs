@@ -236,7 +236,7 @@
             <% if (orders && orders.length> 0) { %>
                 <% orders.forEach(function(order) { %>
                     <div class="order-details">
-                        <h3>Order <%= order._id %>
+                        <h3>Order <%= order.orderId %>
                         </h3>
                         <p><strong>Order Date:</strong>
                             <%= new Date(order.createdOn).toLocaleDateString() %>

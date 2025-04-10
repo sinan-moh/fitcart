@@ -172,35 +172,39 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.cart-item').forEach((item) => {
             const productId = item.id.split('-')[2];
+            const quantityInput = item.querySelector('#quantity');
+            const increaseBtn = item.querySelector('#increase-btn');
+            const decreaseBtn = item.querySelector('#decrease-btn');
 
             // Increase Quantity
-            item.querySelector('#increase-btn').addEventListener('click', () => {
-                const quantityInput = item.querySelector('#quantity');
+            increaseBtn.addEventListener('click', async () => {
                 let currentValue = parseInt(quantityInput.value);
                 const maxValue = parseInt(quantityInput.max);
+                const newQuantity = currentValue + 1;
 
                 if (currentValue < maxValue) {
-                    const newQuantity = currentValue + 1;
-                    quantityInput.value = newQuantity;
-                    updateQuantity(productId, newQuantity);
+                    const result = await updateQuantity(productId, newQuantity);
+                    if (result.success) {
+                        quantityInput.value = newQuantity;
+                    }
                 }
             });
 
             // Decrease Quantity
-            item.querySelector('#decrease-btn').addEventListener('click', () => {
-                const quantityInput = item.querySelector('#quantity');
+            decreaseBtn.addEventListener('click', async () => {
                 let currentValue = parseInt(quantityInput.value);
                 const minValue = parseInt(quantityInput.min);
+                const newQuantity = currentValue - 1;
 
                 if (currentValue > minValue) {
-                    const newQuantity = currentValue - 1;
-                    quantityInput.value = newQuantity;
-                    updateQuantity(productId, newQuantity);
+                    const result = await updateQuantity(productId, newQuantity);
+                    if (result.success) {
+                        quantityInput.value = newQuantity;
+                    }
                 }
             });
         });
@@ -216,18 +220,20 @@
                 body: JSON.stringify({ productId, quantity: newQuantity }),
             });
 
+            const result = await response.json();
+
             if (response.ok) {
-                const result = await response.json();
                 document.getElementById(`total-price-${productId}`).textContent = `₹${result.itemTotalPrice}`;
                 document.getElementById('total-price-summary').textContent = `₹${result.totalPrice}`;
                 document.querySelector('.summary-section .d-flex span:last-child').textContent = result.totalItems;
+                return { success: true };
             } else {
-                const error = await response.json();
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.error || 'Something went wrong, please try again.',
+                    text: result.message || 'Something went wrong, please try again.',
                 });
+                return { success: false };
             }
         } catch (error) {
             Swal.fire({
@@ -235,6 +241,7 @@
                 title: 'An error occurred',
                 text: 'Please check your connection and try again.',
             });
+            return { success: false };
         }
     }
 
@@ -248,8 +255,9 @@
                 body: JSON.stringify({ productId }),
             });
 
+            const result = await response.json();
+
             if (response.ok) {
-                const result = await response.json();
                 Swal.fire({
                     icon: 'success',
                     title: result.message || 'Item successfully removed from the cart!',
@@ -258,11 +266,10 @@
                 });
                 setTimeout(() => window.location.reload(), 1500);
             } else {
-                const error = await response.json();
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.message || 'Something went wrong, please try again.',
+                    text: result.message || 'Something went wrong, please try again.',
                 });
             }
         } catch (error) {
@@ -273,9 +280,11 @@
             });
         }
     }
+
     function proceedToCheckout() {
-        window.location.href = '/check-out'; 
+        window.location.href = '/check-out';
     }
 </script>
+
 
 <%- include("../../views/pratials/user/footer") %>

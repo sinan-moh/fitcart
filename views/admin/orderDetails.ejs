@@ -1,0 +1,49 @@
+<%- include("../../views/pratials/admin/header") %>
+
+<section class="content-main">
+    <div class="content-header">
+        <h2>Order Details - <%= order.orderId %></h2>
+    </div>
+
+    <div class="card p-4">
+        <p><strong>Customer Name:</strong> <%= order.userId.name %></p>
+        <p><strong>Email:</strong> <%= order.userId.email %></p>
+        <p><strong>Status:</strong> <%= order.status %></p>
+        <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+        <p><strong>Total Price:</strong> ₹<%= order.totalPrice %></p>
+        <p><strong>Final Amount:</strong> ₹<%= order.finalAmount %></p>
+
+        <hr>
+        <h5>Shipping Address</h5>
+        <% if (order.fullAddress) { %>
+            <p>
+                <%= order.fullAddress.name %>, 
+                <%= order.fullAddress.landMark %>, 
+                <%= order.fullAddress.city %>, 
+                <%= order.fullAddress.state %> - 
+                <%= order.fullAddress.pincode %><br>
+                Phone: <%= order.fullAddress.phone %>
+            </p>
+        <% } else { %>
+            <p><i>Address not found.</i></p>
+        <% } %>
+
+        <hr>
+        <h5>Ordered Items</h5>
+        <ul>
+            <% order.orderedItems.forEach(item => { %>
+                <li>
+                    <strong><%= item.product.productName %></strong> -
+                    Qty: <%= item.quantity %>,
+                    Price: ₹<%= item.price %>
+                    <% if (item.flavours) { %> | Flavour: <%= item.flavours %> <% } %>
+                    <% if (item.weights) { %> | Weight: <%= item.weights %> <% } %>
+                </li>
+            <% }) %>
+        </ul>
+
+        <a href="/admin/orderList" class="btn btn-secondary mt-3">Back to Orders</a>
+    </div>
+</section>
+
+<%- include("../../views/pratials/admin/footer") %>
