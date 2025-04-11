@@ -302,41 +302,44 @@ const returnOrder = async (req, res) => {
 };
 
 const retryPayment = async (req, res) => {
-    try {
-        const orderId = req.params.orderId;
-        const order = await Order.findById(orderId);
+  try {
+      const orderId = req.params.orderId;
 
-        // Check if order exists and is in 'Payment Pending' status
-        if (!order || order.status !== "Payment Pending") {
-            return res.status(400).json({ message: "Invalid order for repayment." });
-        }
+      const order = await Order.findById(orderId);
+      if (!order) {
+          return res.status(400).json({ message: "Invalid order for repayment." });
+      }
 
-        // Create a new Razorpay order
-        const newOrder = await paymentController.createPayment(order.finalAmount);
-        if (!newOrder) {
-            return res.status(500).json({ message: "Failed to create Razorpay order." });
-        }
+      if (order.status !== "Payment Pending") {
+          return res.status(400).json({ message: "Invalid order for repayment." });
+      }
 
-        // Update the order's payment ID
-        order.paymentId = newOrder.orderId;
-        await order.save();
+      const newOrder = await paymentController.createPayment(order.finalAmount);
+      if (!newOrder) {
+          return res.status(500).json({ message: "Failed to create Razorpay order." });
+      }
 
-        // Store Razorpay order ID and user ID in session for later verification
-        req.session.pendingOrder = { razorpayOrderId: newOrder.orderId, userId: order.userId };
+      order.paymentId = newOrder.orderId;
+      await order.save();
 
-        // Send response with Razorpay details
-        return res.json({
-            success: true,
-            orderId: newOrder.orderId,
-            orderAmount: order.finalAmount * 100, // Convert to paisa
-            RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID
-        });
+      req.session.pendingOrder = {
+          razorpayOrderId: newOrder.orderId,
+          userId: order.userId,
+          orderId: order._id.toString()
+      };
 
-    } catch (error) {
-        console.error("Error retrying payment:", error);
-        return res.status(500).json({ message: "Error retrying payment.", error: error.message });
-    }
+      return res.json({
+          success: true,
+          orderId: newOrder.orderId,
+          orderAmount: order.finalAmount * 100, // paisa
+          RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID
+      });
+
+  } catch (error) {
+      return res.status(500).json({ message: "Error retrying payment.", error: error.message });
+  }
 };
+
 
 
 module.exports = { getOrdersPage, cancelOrder, removeProduct, orderDetails, returnOrder, retryPayment,invoiceDownload};

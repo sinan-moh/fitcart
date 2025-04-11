@@ -35,7 +35,6 @@ const createPayment = async (amount) => {
     }
 };
 
-// ✅ Verify Razorpay Payment
 const verifyRazorpayPayment = async (req, res) => {
     try {
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
@@ -45,27 +44,35 @@ const verifyRazorpayPayment = async (req, res) => {
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
             .digest("hex");
 
+        const pendingOrder = req.session.pendingOrder;
+
         if (expectedSignature === razorpay_signature) {
-            // ✅ Payment is verified
-            const pendingOrder = req.session.pendingOrder;
             if (!pendingOrder || pendingOrder.razorpayOrderId !== razorpay_order_id) {
                 return res.status(400).json({ message: "Invalid session data." });
             }
 
-            // Update order status
             await Order.updateOne(
                 { _id: pendingOrder.orderId },
-                { $set: { status: "Placed", paymentId: razorpay_payment_id } }
+                {
+                    $set: {
+                        status: "Placed",
+                        paymentId: razorpay_payment_id
+                    }
+                }
             );
 
             delete req.session.pendingOrder;
 
-            return res.status(200).json({ message: "Payment verified and order placed successfully." });
+            return res.status(200).json({
+                success: true,
+                message: "Payment verified and order placed successfully."
+            });
 
         } else {
-            console.log(" Razorpay Signature Verification Failed");
+            const order =
+                await Order.findOne({ paymentId: razorpay_order_id }) ||
+                await Order.findById(razorpay_order_id);
 
-            const order = await Order.findOne({ paymentId: razorpay_order_id }) || await Order.findById(razorpay_order_id);
             const orderId = order?._id || razorpay_order_id;
             const amount = order?.finalAmount || 0;
             const retryUrl = `/retry-payment/${orderId}`;
@@ -79,10 +86,13 @@ const verifyRazorpayPayment = async (req, res) => {
         }
 
     } catch (error) {
-        console.error(" Error verifying Razorpay payment:", error);
-        return res.status(500).json({ message: "Payment verification failed.", error: error.message });
+        return res.status(500).json({
+            message: "Payment verification failed.",
+            error: error.message
+        });
     }
 };
+
 
 module.exports = {
     createPayment,

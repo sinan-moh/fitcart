@@ -467,51 +467,71 @@
             }
 
             function Repay(orderId) {
-                fetch(`/retry-payment/${orderId}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
+    fetch(`/retry-payment/${orderId}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var options = {
+                    key: data.RAZORPAY_KEY_ID,
+                    amount: data.orderAmount,
+                    currency: "INR",
+                    name: "OxyFitness",
+                    description: "Order Repayment",
+                    order_id: data.orderId,
+                    handler: function (response) {
+                        fetch("/verify-payment", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(response),
+                        })
+                            .then(res => res.json())
+                            .then(result => {
+                                if (result.success) {
+                                    Swal.fire({
+                                        icon: "success",
+                                        title: "Payment Successful!",
+                                        text: "Your order has been placed successfully.",
+                                        confirmButtonColor: "#3085d6",
+                                        confirmButtonText: "OK",
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Payment Failed",
+                                        text: "Something went wrong. Please try again.",
+                                    });
+                                }
+                            });
                     },
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Redirect to Razorpay checkout page
-                            var options = {
-                                key: data.RAZORPAY_KEY_ID,
-                                amount: data.orderAmount,
-                                currency: "INR",
-                                name: "OxyFitness",
-                                description: "Order Repayment",
-                                order_id: data.orderId,
-                                handler: function (response) {
-                                    // Send response to server for verification
-                                    fetch("/verify-payment", {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify(response),
-                                    })
-                                        .then(res => res.json())
-                                        .then(result => {
-                                            if (result.success) {
-                                                alert("Payment Successful!");
-                                                location.reload();
-                                            } else {
-                                                alert("Payment Failed. Please try again.");
-                                            }
-                                        });
-                                },
-                                theme: { color: "#3399cc" }
-                            };
+                    theme: { color: "#3399cc" }
+                };
 
-                            var rzp1 = new Razorpay(options);
-                            rzp1.open();
-                        } else {
-                            alert("Something went wrong. Please try again.");
-                        }
-                    })
-                    .catch(error => console.error("Error:", error));
+                var rzp1 = new Razorpay(options);
+                rzp1.open();
+            } else {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Oops!",
+                    text: "Something went wrong. Please try again.",
+                });
             }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Unable to process your request right now.",
+            });
+        });
+}
 
 
 
