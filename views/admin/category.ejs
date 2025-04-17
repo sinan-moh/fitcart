@@ -179,5 +179,96 @@
     </section>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script>     function handleFormSubmit(event) { event.preventDefault(); if (!validateForm()) { return; } const name = document.getElementsByName("name")[0].value; const description = document.getElementById("descriptionId").value; fetch("/admin/addCategory", { method: "POST", headers: { "Content-type": 'application/json' }, body: JSON.stringify({ name, description }) }).then(response => { if (!response.ok) { return response.json().then((err) => { throw new Error(err.error); }) } return response.json(); }).then(data => { location.reload(); }).catch(error => { if (error.message === "category already exists") { Swal.fire({ icon: "error", title: "Oops", text: "Category already exists" }) } else { Swal.fire({ icon: "error", title: "Oops", text: "An error occurred while adding the category" }) } }) } function validateForm() { clearErrorMessages(); const name = document.getElementsByName("name")[0].value.trim(); const description = document.getElementById("descriptionId").value.trim(); let isValid = true; if (name === "") { displayErrorMessage("name-error", "Please enter a name"); isValid = false; } else if (!/^[a-zA-Z\s]+$/.test(name)) { displayErrorMessage("name-error", "Category name should only contain alphabetic characters"); isValid = false; } if (description === "") { displayErrorMessage("description-error", "Please enter a description"); isValid = false; } return isValid; } function displayErrorMessage(elementId, message) { const errorElement = document.getElementById(elementId); errorElement.innerText = message; errorElement.style.display = "block"; } function clearErrorMessages() { const errorElements = document.getElementsByClassName("error-message"); Array.from(errorElements).forEach((element) => { element.innerText = ""; element.style.display = "none"; }) } async function addOffer(categoryId) { const { value: amount } = await Swal.fire({ title: "Offer in percentage", input: "number", inputLabel: "Percentage", inputPlaceholder: "%" }); if (amount) { try { const response = await fetch("/admin/addCategoryOffer", { method: "POST", headers: { 'Content-type': "application/json", }, body: JSON.stringify({ percentage: amount, categoryId: categoryId, }), }); const data = await response.json(); if (response.ok && data.status === true) { Swal.fire("Offer added", "The offer has been added", 'success').then(() => { location.reload(); }); } else { Swal.fire("Failed", data.message || "Adding offer failed", "error"); } } catch (error) { Swal.fire("Error", "An error occurred while adding the offer", "error"); console.error("Error adding offer", error); } } } async function removeOffer(categoryId) { try { const response = await fetch("/admin/removeCategoryOffer", { method: "POST", headers: { "content-type": "application/json", }, body: JSON.stringify({ categoryId: categoryId, }), }); const data = await response.json(); if (response.ok && data.status === true) { Swal.fire("Offer removed", "The offer has been removed", "success").then(() => { location.reload(); }); } else { Swal.fire("Failed", data.message || "Removing offer failed", "error"); } } catch (error) { Swal.fire("Error", "An error occurred while removing the offer", "error"); console.error("Error removing offer", error); } }   </script>
+
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault(); // Prevent form from submitting
+
+            // Validate form fields
+            if (!validateForm()) {
+                return;
+            }
+
+            const name = document.getElementsByName("name")[0].value;
+            const description = document.getElementById("descriptionId").value;
+
+            // Send form data via fetch
+            fetch("/admin/addCategory", {
+                method: "POST",
+                headers: {
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify({ name, description }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.error || "An error occurred while adding the category");
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    Swal.fire("Success", "Category added successfully", "success")
+                        .then(() => {
+                            location.reload(); // Reload the page after success
+                        });
+                })
+                .catch(error => {
+                    // Display specific error messages
+                    if (error.message === "Category already exists") {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops",
+                            text: "Category already exists",
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops",
+                            text: error.message,
+                        });
+                    }
+                });
+        }
+
+        function validateForm() {
+            clearErrorMessages(); // Clear previous error messages
+            const name = document.getElementsByName("name")[0].value.trim();
+            const description = document.getElementById("descriptionId").value.trim();
+            let isValid = true;
+
+            // Validate category name
+            if (name === "") {
+                displayErrorMessage("name-error", "Please enter a name");
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+                displayErrorMessage("name-error", "Category name should only contain alphabetic characters");
+                isValid = false;
+            }
+
+            // Validate description
+            if (description === "") {
+                displayErrorMessage("description-error", "Please enter a description");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function displayErrorMessage(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.innerText = message;
+            errorElement.style.display = "block"; // Make error message visible
+        }
+
+        function clearErrorMessages() {
+            const errorElements = document.getElementsByClassName("error-message");
+            Array.from(errorElements).forEach((element) => {
+                element.innerText = "";
+                element.style.display = "none"; // Hide error messages
+            });
+        }
+    </script>
+
     <%- include("../../views/pratials/admin/footer") %>

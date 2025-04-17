@@ -73,60 +73,66 @@ const cancelOrder = async (req, res) => {
         res.status(500).json({ success: false, message: 'Error cancelling the order', error: error.message });
     }
 };
-
-//  Remove a product from an order and adjust pricing
 const removeProduct = async (req, res) => {
-    try {
-        const { orderId, productId } = req.params;
-        const order = await Order.findById(orderId).populate('orderedItems.product');
+  try {
+      const { orderId, productId } = req.params;
+      const order = await Order.findById(orderId).populate('orderedItems.product');
 
-        if (!order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
-        }
+      if (!order) {
+          return res.status(404).json({ success: false, message: 'Order not found' });
+      }
 
-        const productIndex = order.orderedItems.findIndex(item => item.product._id.toString() === productId);
-        if (productIndex === -1) {
-            return res.json({ success: false, message: 'Product not found in the order' });
-        }
+      const productIndex = order.orderedItems.findIndex(item => item.product._id.toString() === productId);
+      if (productIndex === -1) {
+          return res.json({ success: false, message: 'Product not found in the order' });
+      }
 
-        const removedItem = order.orderedItems[productIndex];
-        const product = await Product.findById(removedItem.product._id);
+      const removedItem = order.orderedItems[productIndex];
+      const product = await Product.findById(removedItem.product._id);
 
-        if (product) {
-            product.quantity += removedItem.quantity;
-            await product.save();
-        }
+      if (product) {
+          product.quantity += removedItem.quantity; // Update product stock
+          await product.save();
+      }
 
-        // Refund to wallet for removed product
-        const refundAmount = removedItem.quantity * removedItem.product.salePrice;
-        if (refundAmount > 0) {
-            await walletController.updateWallet(refundAmount, "credit", order.userId, "Product Removed", order._id);
-        }
+      // Refund to wallet for removed product
+      const refundAmount = removedItem.quantity * removedItem.product.salePrice;
+      if (refundAmount > 0) {
+          await walletController.updateWallet(refundAmount, "credit", order.userId, "Product Removed", order._id);
+      }
 
-        order.orderedItems.splice(productIndex, 1);
-        order.totalPrice -= refundAmount;
-        order.discount = order.totalPrice > 1000 ? order.totalPrice * 0.1 : 0;
-        order.finalAmount = order.totalPrice - order.discount;
+      // Mark the specific product as 'Cancelled' in the orderedItems
+      order.orderedItems[productIndex].status = 'Cancelled';  // Change the product status to 'Cancelled'
 
-        if (order.orderedItems.length === 0) {
-            order.status = 'Cancelled';
-            order.totalPrice = 0;
-            order.discount = 0;
-            order.finalAmount = 0;
-        }
+      // Explicitly mark the orderedItems array as modified so that Mongoose persists the change
+      order.markModified('orderedItems');
 
-        await order.save();
+      order.totalPrice -= refundAmount;
+      order.discount = order.totalPrice > 1000 ? order.totalPrice * 0.1 : 0;
+      order.finalAmount = order.totalPrice - order.discount;
 
-        res.json({
-            success: true,
-            message: 'Product removed successfully, stock updated, and refund issued',
-            order: { totalPrice: order.totalPrice, discount: order.discount, finalAmount: order.finalAmount },
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Error removing the product', error: error.message });
-    }
+      // If the order has no items left, mark the overall order as 'Cancelled'
+      if (order.orderedItems.length === 0) {
+          order.status = 'Cancelled'; // Set overall order status to 'Cancelled' if no items left
+          order.totalPrice = 0;
+          order.discount = 0;
+          order.finalAmount = 0;
+      }
+
+      await order.save();
+
+      res.json({
+          success: true,
+          message: 'Product status changed to cancelled, stock updated, and refund issued',
+          order: { totalPrice: order.totalPrice, discount: order.discount, finalAmount: order.finalAmount },
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Error removing the product', error: error.message });
+  }
 };
+
+
 
 const invoiceDownload = async (req, res) => {
     try {

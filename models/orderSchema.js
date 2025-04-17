@@ -34,6 +34,11 @@ const orderSchema = new Schema({
         weights: {
             type: String,
         },
+        status: {  // ✅ NEW FIELD FOR ITEM-LEVEL STATUS
+            type: String,
+            enum: ['Placed', 'Cancelled'],
+            default: 'Placed',
+        },
     }],
     totalPrice: {
         type: Number,
@@ -61,7 +66,7 @@ const orderSchema = new Schema({
         required: true,
         enum: ['Placed', 'Processing', 'Payment Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returning', 'Returned'],
     },
-    paymentMethod: { // ✅ NEW FIELD
+    paymentMethod: {
         type: String,
         enum: ['cod', 'wallet', 'online-payment'],
         required: true,

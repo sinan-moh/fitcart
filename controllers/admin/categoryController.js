@@ -32,27 +32,55 @@ const categoryInfo = async (req, res) => {
 }
 const addCategory = async (req, res) => {
     const { name, description } = req.body;
-    try {
-        const existingCategory = await Category.findOne({ name })
-        if (existingCategory) {
-            return res.status(400).json({ error: "Category alredy exists" })
-        }
-        const newCategory = new Category({
-            name,
-            description,
-        })
-        await newCategory.save()
-        return res.json({ message: "Category added successfully" })
-    } catch (error) {
-        return res.status(500).json({ message: "internal server error" })
+
+    // Input validation
+    if (!name || !description) {
+        return res.status(400).json({ error: "Name and description are required" });
     }
-}
+
+    // Validate category name: ensure it’s not just spaces and follows a specific format (alphanumeric + spaces)
+    const nameRegex = /^[a-zA-Z0-9\s]+$/;
+    if (!nameRegex.test(name)) {
+        return res.status(400).json({ error: "Category name must be alphanumeric and can only include spaces" });
+    }
+
+    // Validate description: must be at least 10 characters long
+    if (description.length < 10) {
+        return res.status(400).json({ error: "Description must be at least 10 characters long" });
+    }
+
+    // Trim and sanitize inputs (to prevent accidental spaces and unwanted characters)
+    const sanitizedName = name.trim();
+    const sanitizedDescription = description.trim();
+
+    try {
+        // Check if category already exists (case insensitive check)
+        const existingCategory = await Category.findOne({ name: sanitizedName.toLowerCase() });
+        if (existingCategory) {
+            return res.status(400).json({ error: "Category already exists" });
+        }
+
+        // Create and save new category
+        const newCategory = new Category({
+            name: sanitizedName,
+            description: sanitizedDescription,
+        });
+        await newCategory.save();
+
+        return res.json({ message: "Category added successfully" });
+    } catch (error) {
+        console.error(error); // Log error for debugging
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 
 const addCategoryOffer = async (req, res) => {
     try {
         const percentage = parseInt(req.body.percentage);
         const categoryId = req.body.categoryId
         const category = await Category.findById(categoryId);
+        
 
         if (!category) {
             return res.status(404).json({ status: false, message: "Category not found" })

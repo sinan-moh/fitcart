@@ -38,10 +38,6 @@ app.use((req, res, next) => {
   res.locals.user = req.user || null; // Ensures user is accessible in all views
   next();
 });
-// app.use((req, res, next) => {
-//   res.set('Cache-Control', 'no-store');
-//   next();
-// });
 
 
 // View engine setup
@@ -54,6 +50,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Routes
 app.use('/', userRouter);
 app.use('/admin', adminRouter);
+
+app.use((req, res, next) => {
+  res.status(404).render('page-404');
+});
 
 
 // Start server

@@ -213,6 +213,14 @@
             display: inline-block;
 
         }
+        .cancelled-product {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.cancelled-product .cancel-button {
+    display: none;
+}
+
     </style>
 
     <!-- Profile Page -->
@@ -229,96 +237,85 @@
             </ul>
         </div>
 
-        <!-- Main Profile Content -->
-        <div class="profile-content">
-            <h2>My Orders</h2>
+<!-- Main Profile Content -->
+<div class="profile-content">
+    <h2>My Orders</h2>
 
-            <% if (orders && orders.length> 0) { %>
-                <% orders.forEach(function(order) { %>
-                    <div class="order-details">
-                        <h3>Order <%= order.orderId %>
-                        </h3>
-                        <p><strong>Order Date:</strong>
-                            <%= new Date(order.createdOn).toLocaleDateString() %>
-                        </p>
-                        <p><strong>Status:</strong>
-                            <span class="order-status <%= order.status.toLowerCase() %>">
-                                <%= order.status %>
-                            </span>
-                        </p>
+    <% if (orders && orders.length > 0) { %>
+        <% orders.forEach(function(order) { 
+            const activeItemsCount = order.orderedItems.filter(item => item.status !== 'Cancelled').length;
+        %>
+            <div class="order-details">
+                <h3>Order <%= order.orderId %></h3>
+                <p><strong>Order Date:</strong> <%= new Date(order.createdOn).toLocaleDateString() %></p>
+                <p><strong>Status:</strong> 
+                    <span class="order-status <%= order.status.toLowerCase() %>">
+                        <%= order.status %>
+                    </span>
+                </p>
 
-                        <!-- Conditional logic for different statuses -->
-                        <div class="ordered-products">
-                            <% order.orderedItems.forEach(function(item) { %>
-                                <% if (item.status !=='Cancelled' ) { %>
-                                    <div class="product">
-                                        <div class="product-info">
-                                            <span class="product-name">
-                                                <%= item.product.productName %>
-                                            </span>
-                                            <span class="product-price">Price: <%= item.price %></span>
-                                            <span class="quantity">Qty: <%= item.quantity %></span>
-                                            <span class="weights">Weight: <%= item.weights %></span>
-                                            <span class="flavour">Flavour: <%= item.flavours %></span>
-                                            <span class="product-name">
-                                                <%= item.product.name %>
-                                            </span>
-                                            <span class="date">
-                                                <%= item.createdOn %>
-                                            </span>
-                                        </div>
-                                        <img src="/uploads/re-image/<%= item.product.productImage[0] || 'default.jpg' %>"
-                                            alt="Product Image" class="product-image">
+                <div class="ordered-products">
+                    <% order.orderedItems.forEach(function(item) { %>
+                        <div class="product <%= item.status === 'Cancelled' ? 'cancelled-product' : '' %>">
+                            <div class="product-info">
+                                <span class="product-name"><%= item.product.productName %></span>
+                                <span class="product-price">Price: <%= item.price %></span>
+                                <span class="quantity">Qty: <%= item.quantity %></span>
+                                <span class="weights">Weight: <%= item.weights %></span>
+                                <span class="flavour">Flavour: <%= item.flavours %></span>
 
-                                        <!-- Cancel Product Button (Display only if product status is 'Placed') -->
-                                        <% if (order.orderedItems.length> 1 && order.status === 'Placed') { %>
-                                            <button class="cancel-button"
-                                                onclick="showRemoveProductModal('<%= order._id %>', '<%= item.product._id %>')">
-                                                Cancel Product
-                                            </button>
-                                            <% } %>
+                                <% if (item.status === 'Cancelled') { %>
+                                    <span class="product-status" style="color: red;">[Cancelled]</span>
+                                <% } %>
+                            </div>
 
-                                    </div>
-                                    <% } %>
-                                        <% }); %>
-                        </div>
+                            <img src="/uploads/re-image/<%= item.product.productImage[0] || 'default.jpg' %>" 
+                                alt="Product Image" class="product-image">
 
-                        <!-- Cancel Order Button with status checks -->
-                        <% if (order.status==='Placed' ) { %>
-                            <button class="cancel-button" onclick="showCancelModal('<%= order._id %>')">
-                                Cancel Order
-                            </button>
-                            <% } else if (order.status==='Shipped' ) { %>
-                                <span class="order-status shipped">Shipped</span>
-                                <% }else if (order.status==='Payment Pending' ) { %>
-                                    <button class="button" onclick="Repay('<%= order._id %>')">Repay</button>
-                                    <% } else if (order.status==='Delivered' ) { %>
-                                        <span class="order-status delivered">Delivered</span>
-
-                                        <!-- Add Return and Rating options for Delivered orders -->
-                                        <button class="return-button button"
-                                            onclick="showReturnOrderModal('<%= order._id %>')">
-                                            Return Product
-                                        </button>
-                                        <button class="rate-button button"
-                                            onclick="showRatingModal('<%= order._id %>')">
-                                            Rate Product
-                                        </button>
-                                        <% } else if (order.status==='Cancelled' ) { %>
-                                            <span class="order-status cancelled">Cancelled</span>
-                                            <% } %>
-
-                                                <!-- Order Details Button -->
-                                                <button class="details-button button"
-                                                    onclick="viewOrderDetails('<%= order._id %>')">
-                                                    View Details
-                                                </button>
-                    </div>
-                    <% }); %>
-                        <% } else { %>
-                            <p class="no-orders">You have no orders yet.</p>
+                            <% if (
+                                item.status !== 'Cancelled' &&
+                                order.status === 'Placed' &&
+                                activeItemsCount > 1
+                            ) { %>
+                                <button class="cancel-button"
+                                    onclick="showRemoveProductModal('<%= order._id %>', '<%= item.product._id %>')">
+                                    Cancel Product
+                                </button>
                             <% } %>
-        </div>
+                        </div>
+                    <% }); %>
+                </div>
+
+                <!-- Cancel Order Button with status checks -->
+                <% if (order.status === 'Placed') { %>
+                    <button class="cancel-button" onclick="showCancelModal('<%= order._id %>')">
+                        Cancel Order
+                    </button>
+                <% } else if (order.status === 'Shipped') { %>
+                    <span class="order-status shipped">Shipped</span>
+                <% } else if (order.status === 'Payment Pending') { %>
+                    <button class="button" onclick="Repay('<%= order._id %>')">Repay</button>
+                <% } else if (order.status === 'Delivered') { %>
+                    <span class="order-status delivered">Delivered</span>
+                    <button class="return-button button" onclick="showReturnOrderModal('<%= order._id %>')">
+                        Return Product
+                    </button>
+                    <button class="rate-button button" onclick="showRatingModal('<%= order._id %>')">
+                        Rate Product
+                    </button>
+                <% } else if (order.status === 'Cancelled') { %>
+                    <span class="order-status cancelled">Cancelled</span>
+                <% } %>
+
+                <button class="details-button button" onclick="viewOrderDetails('<%= order._id %>')">
+                    View Details
+                </button>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <p class="no-orders">You have no orders yet.</p>
+    <% } %>
+</div>
 
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.6/dist/sweetalert2.all.min.js"></script>

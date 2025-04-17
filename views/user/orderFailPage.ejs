@@ -30,14 +30,16 @@
                                 </div>
                                 <div class="col-6 text-end">
                                     <p class="mb-2 fw-bold"><%= orderId %></p>
-                                    <p class="mb-2 fw-bold">₹<%= amount %></p>
+                                    <p class="mb-2 fw-bold">₹<%= (amount / 100).toFixed(2) %></p>
                                     <p class="mb-2 text-danger fw-bold"><%= status %></p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="d-grid gap-2">
-                            
+                            <button class="btn btn-outline-primary" onclick="window.location.href='/retry-payment/<%= orderId %>'">
+                                Retry Payment
+                            </button>
                             <button class="btn btn-outline-secondary" onclick="window.location.href='/myOrder'">
                                 View Orders
                             </button>
