@@ -151,32 +151,28 @@ function generateOtp() {
 
 async function sendVerificationEmail(email, otp) {
     try {
-        console.log("MAIL USER:", process.env.NODEMAILER_EMAIL);
-        console.log("MAIL PASS EXISTS:", !!process.env.NODEMAILER_PASSWORD);
-
         const transporter = nodemailer.createTransport({
-            service: "gmail",
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
             auth: {
                 user: process.env.NODEMAILER_EMAIL,
                 pass: process.env.NODEMAILER_PASSWORD
-            }
+            },
+            connectionTimeout: 10000
         });
 
         const info = await transporter.sendMail({
-            from: `"FitCart" <${process.env.NODEMAILER_EMAIL}>`,
+            from: process.env.NODEMAILER_EMAIL,
             to: email,
             subject: "Verify your account",
             text: `Your OTP is ${otp}`,
             html: `<b>Your OTP: ${otp}</b>`
         });
 
-        console.log("Email sent:", info.accepted);
-
         return info.accepted.length > 0;
-
     } catch (error) {
-        console.error("Error sending email:", error.message);
-        console.error(error);
+        console.error("Error sending email", error);
         return false;
     }
 }
