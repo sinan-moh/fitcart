@@ -144,6 +144,9 @@ function generateOtp() {
 
 async function sendVerificationEmail(email, otp) {
   try {
+    console.log("USING SMTP HOST:", process.env.SMTP_HOST);
+    console.log("USING SMTP PORT:", process.env.SMTP_PORT);
+
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
@@ -152,6 +155,7 @@ async function sendVerificationEmail(email, otp) {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      connectionTimeout: 30000,
     });
 
     const info = await transporter.sendMail({
@@ -160,8 +164,8 @@ async function sendVerificationEmail(email, otp) {
       subject: "Verify your account",
       html: `<b>Your OTP: ${otp}</b>`,
     });
-    console.log("Email sent:", info.messageId);
 
+    console.log("Email sent:", info.messageId);
     return info.accepted.length > 0;
   } catch (error) {
     console.error("Error sending email", error);
