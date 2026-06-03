@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-  "start": "node app.js",
-  "dev": "nodemon app.js"
-},
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
   "author": "",
   "license": "ISC",
   "description": "",
@@ -29,6 +29,7 @@
     "pdfkit": "^0.16.0",
     "razorpay": "^2.9.5",
     "sharp": "^0.33.5",
+    "sib-api-v3-sdk": "^8.5.0",
     "uuid": "^11.0.3"
   }
 }

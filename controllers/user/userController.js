@@ -142,33 +142,44 @@ function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+const SibApiV3Sdk = require("sib-api-v3-sdk");
+
 async function sendVerificationEmail(email, otp) {
   try {
-    console.log("USING SMTP HOST:", process.env.SMTP_HOST);
-    console.log("USING SMTP PORT:", process.env.SMTP_PORT);
+    const client = SibApiV3Sdk.ApiClient.instance;
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+    const apiKey = client.authentications["api-key"];
+    apiKey.apiKey = process.env.BREVO_API_KEY;
+
+    const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
+
+    await tranEmailApi.sendTransacEmail({
+      sender: {
+        email: process.env.MAIL_FROM,
+        name: "FitCart",
       },
-      connectionTimeout: 30000,
+      to: [
+        {
+          email: email,
+        },
+      ],
+      subject: "Verify Your Account",
+      htmlContent: `
+        <h2>FitCart OTP Verification</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP will expire soon.</p>
+      `,
     });
 
-    const info = await transporter.sendMail({
-      from: `"FitCart" <${process.env.MAIL_FROM}>`,
-      to: email,
-      subject: "Verify your account",
-      html: `<b>Your OTP: ${otp}</b>`,
-    });
+    console.log("Brevo email sent successfully");
+    return true;
 
-    console.log("Email sent:", info.messageId);
-    return info.accepted.length > 0;
   } catch (error) {
-    console.error("Error sending email", error);
+    console.error(
+      "Brevo API Error:",
+      error.response?.body || error.message || error
+    );
     return false;
   }
 }
